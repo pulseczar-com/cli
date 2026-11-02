@@ -1,0 +1,13 @@
+id: B2C4D6F8G1H3
+name: "Checkout, API"
+type: http
+status: down
+uptime_24h: 87.5%
+url: https://api.example.com/health
+every: 5m
+snoozed: until 2026-11-01T11:00:00Z
+last_checked_at: 2026-11-01T09:59:30Z
+incidents_total: 2
+recent_incidents[2]{id,status,started_at,duration}:
+  4T9WQ8ZN2HJ5,DOWN,2026-11-01T09:12:00Z,48m
+  6R8T0V2X4Z6B,RESOLVED,2026-10-30T22:00:00Z,7m

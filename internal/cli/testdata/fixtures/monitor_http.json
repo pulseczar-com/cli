@@ -1,0 +1,88 @@
+{
+  "public_id": "B2C4D6F8G1H3",
+  "name": "Checkout, API",
+  "type": "http",
+  "url": "https://api.example.com/health",
+  "status": "down",
+  "stale_at": null,
+  "word": "DOWN",
+  "tone": "bad",
+  "is_new": false,
+  "is_muted": true,
+  "is_paused": false,
+  "muted_until": "2026-11-01T11:00:00Z",
+  "mute_mode": "until",
+  "last_evaluated_at": "2026-11-01T09:59:30Z",
+  "last_checked_at": "2026-11-01T09:59:30Z",
+  "uptime_24h": 87.5,
+  "schedule": "every 5m",
+  "foot_left": "",
+  "foot_right": "",
+  "foot_right_label": "",
+  "bars": [],
+  "at": "2026-11-01T10:00:00Z",
+  "interval_seconds": 300,
+  "timeout_seconds": 10,
+  "grace_period_pulses": 2,
+  "recovery_confirmation_pulses": 2,
+  "meta": "",
+  "response": 182,
+  "regions": [],
+  "ping_url": null,
+  "grace_seconds": null,
+  "next_due_at": null,
+  "next_due_late": null,
+  "last_heard_at": null,
+  "recent_incidents": [
+    {
+      "public_id": "4T9WQ8ZN2HJ5",
+      "monitor_public_id": "B2C4D6F8G1H3",
+      "monitor_name": "Checkout, API",
+      "started_at": "2026-11-01T09:12:00Z",
+      "failing_since": "2026-11-01T09:10:00Z",
+      "ended_at": null,
+      "is_open": true,
+      "status_word": "DOWN",
+      "duration_word": "48m",
+      "so_far": "48m",
+      "scope": "2 of 3 locations failing:",
+      "locations": [
+        {
+          "location": "Frankfurt",
+          "ok": false,
+          "silent": false
+        },
+        {
+          "location": "Virginia",
+          "ok": false,
+          "silent": false
+        },
+        {
+          "location": "Singapore",
+          "ok": true,
+          "silent": false
+        },
+        {
+          "location": "Sydney",
+          "ok": false,
+          "silent": true
+        }
+      ]
+    },
+    {
+      "public_id": "6R8T0V2X4Z6B",
+      "monitor_public_id": "B2C4D6F8G1H3",
+      "monitor_name": "Checkout, API",
+      "started_at": "2026-10-30T22:00:00Z",
+      "failing_since": "2026-10-30T21:58:00Z",
+      "ended_at": "2026-10-30T22:07:00Z",
+      "is_open": false,
+      "status_word": "RESOLVED",
+      "duration_word": "7m",
+      "so_far": null,
+      "scope": null,
+      "locations": []
+    }
+  ],
+  "incidents_total": 2
+}

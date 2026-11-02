@@ -1,0 +1,60 @@
+{
+  "at": "2026-11-01T10:00:00Z",
+  "counts": {
+    "open": 1,
+    "resolved": 1
+  },
+  "incidents": [
+    {
+      "public_id": "4T9WQ8ZN2HJ5",
+      "monitor_public_id": "B2C4D6F8G1H3",
+      "monitor_name": "Checkout, API",
+      "started_at": "2026-11-01T09:12:00Z",
+      "failing_since": "2026-11-01T09:10:00Z",
+      "ended_at": null,
+      "is_open": true,
+      "status_word": "DOWN",
+      "duration_word": "48m",
+      "so_far": "48m",
+      "scope": "2 of 3 locations failing:",
+      "locations": [
+        {
+          "location": "Frankfurt",
+          "ok": false,
+          "silent": false
+        },
+        {
+          "location": "Virginia",
+          "ok": false,
+          "silent": false
+        },
+        {
+          "location": "Singapore",
+          "ok": true,
+          "silent": false
+        },
+        {
+          "location": "Sydney",
+          "ok": false,
+          "silent": true
+        }
+      ]
+    },
+    {
+      "public_id": "6R8T0V2X4Z6B",
+      "monitor_public_id": "B2C4D6F8G1H3",
+      "monitor_name": "Checkout, API",
+      "started_at": "2026-10-30T22:00:00Z",
+      "failing_since": "2026-10-30T21:58:00Z",
+      "ended_at": "2026-10-30T22:07:00Z",
+      "is_open": false,
+      "status_word": "RESOLVED",
+      "duration_word": "7m",
+      "so_far": null,
+      "scope": null,
+      "locations": []
+    }
+  ],
+  "has_more": true,
+  "next_cursor": "eyJpZCI6NDJ9"
+}

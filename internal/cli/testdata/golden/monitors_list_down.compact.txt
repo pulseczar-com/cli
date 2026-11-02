@@ -1,0 +1,3 @@
+count: 1
+monitors[1]{id,name,status,uptime_24h}:
+  B2C4D6F8G1H3,"Checkout, API",down,87.5%

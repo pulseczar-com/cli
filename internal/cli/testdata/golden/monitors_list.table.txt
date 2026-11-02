@@ -1,0 +1,5 @@
+ID            NAME            STATUS  UPTIME 24H
+7K3M9XQ2T4VB  Marketing site  up      99.98%
+B2C4D6F8G1H3  Checkout, API   down    87.5%
+M5N7P9Q1R3S5  Nightly backup  stale   -
+T2V4W6X8Y0Z1  Old blog        paused  100%

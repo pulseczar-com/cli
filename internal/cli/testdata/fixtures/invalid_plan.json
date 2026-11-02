@@ -1,0 +1,8 @@
+{
+  "message": "Your Free plan allows 5 running monitors. Upgrade to add more.",
+  "errors": {
+    "plan": [
+      "Your Free plan allows 5 running monitors. Upgrade to add more."
+    ]
+  }
+}

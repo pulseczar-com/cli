@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-01T10:00:00Z",
+  "counts": {
+    "open": 0,
+    "resolved": 0
+  },
+  "incidents": [],
+  "has_more": false,
+  "next_cursor": null
+}

@@ -1,0 +1,15 @@
+id: 4T9WQ8ZN2HJ5
+monitor_id: B2C4D6F8G1H3
+monitor: "Checkout, API"
+status: DOWN
+started_at: 2026-11-01T09:12:00Z
+failing_since: 2026-11-01T09:10:00Z
+ended_at: -
+duration: 48m
+scope: 2 of 3 locations failing:
+quorum: 2 of 4
+locations[4]{location,state}:
+  Frankfurt,failing
+  Virginia,failing
+  Singapore,up
+  Sydney,silent

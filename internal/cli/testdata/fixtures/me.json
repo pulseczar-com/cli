@@ -1,0 +1,29 @@
+{
+  "id": 7,
+  "name": "Ada Lovelace",
+  "email": "ada@example.com",
+  "is_admin": false,
+  "plan": "free",
+  "plan_word": "Free",
+  "subscription": null,
+  "monitor_count": 4,
+  "active_monitor_count": 3,
+  "monitor_limit": 5,
+  "email_alerts_enabled": true,
+  "push_alerts_enabled": false,
+  "email_bounced": false,
+  "timezone": "America/Chicago",
+  "quiet_hours_enabled": false,
+  "quiet_hours_start": null,
+  "quiet_hours_end": null,
+  "reminder_interval_seconds": null,
+  "config": {
+    "poll": {
+      "status": 30,
+      "strip": 60,
+      "board": 60,
+      "graph": 300,
+      "incidents": 60
+    }
+  }
+}

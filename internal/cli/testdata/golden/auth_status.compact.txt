@@ -1,0 +1,6 @@
+account: ada@example.com
+name: Ada Lovelace
+plan: Free
+monitors: 4 of 5
+server: https://czar.test
+token_from: PULSECZAR_TOKEN

@@ -1,0 +1,2 @@
+count: 0
+incidents[0]{id,monitor_id,monitor,status,started_at,duration}:

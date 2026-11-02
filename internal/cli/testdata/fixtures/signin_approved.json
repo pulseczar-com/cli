@@ -1,0 +1,4 @@
+{
+  "access_token": "1|secret-token-value",
+  "token_type": "Bearer"
+}

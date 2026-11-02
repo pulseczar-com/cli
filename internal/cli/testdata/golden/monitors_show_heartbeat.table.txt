@@ -1,0 +1,13 @@
+id               M5N7P9Q1R3S5
+name             Nightly backup
+type             heartbeat
+status           up
+uptime_24h       -
+url              -
+every            1d
+snoozed          no
+last_checked_at  2026-11-01T09:59:30Z
+incidents_total  0
+ping_url         https://pulseczar.com/ping/abc123
+grace            1h
+last_heard_at    2026-11-01T03:00:04Z

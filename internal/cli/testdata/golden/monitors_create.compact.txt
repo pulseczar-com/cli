@@ -1,0 +1,11 @@
+id: N8P1Q3R5S7T9
+name: example.com
+type: http
+status: up
+uptime_24h: -
+url: https://example.com
+every: 5m
+snoozed: no
+last_checked_at: 2026-11-01T09:59:30Z
+incidents_total: 0
+recent_incidents[0]{id,status,started_at,duration}:

@@ -1,0 +1,3 @@
+error: Your Free plan allows 5 running monitors. Upgrade to add more.
+code: invalid
+plan: Your Free plan allows 5 running monitors. Upgrade to add more.

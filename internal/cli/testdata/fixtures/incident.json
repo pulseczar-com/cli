@@ -1,0 +1,44 @@
+{
+  "public_id": "4T9WQ8ZN2HJ5",
+  "monitor_public_id": "B2C4D6F8G1H3",
+  "monitor_name": "Checkout, API",
+  "started_at": "2026-11-01T09:12:00Z",
+  "failing_since": "2026-11-01T09:10:00Z",
+  "ended_at": null,
+  "is_open": true,
+  "status_word": "DOWN",
+  "duration_word": "48m",
+  "so_far": "48m",
+  "scope": "2 of 3 locations failing:",
+  "locations": [
+    {
+      "location": "Frankfurt",
+      "ok": false,
+      "silent": false
+    },
+    {
+      "location": "Virginia",
+      "ok": false,
+      "silent": false
+    },
+    {
+      "location": "Singapore",
+      "ok": true,
+      "silent": false
+    },
+    {
+      "location": "Sydney",
+      "ok": false,
+      "silent": true
+    }
+  ],
+  "at": "2026-11-01T10:00:00Z",
+  "quorum_used": 2,
+  "active_node_count": 4,
+  "grace_period_pulses": 2,
+  "recovery_confirmation_pulses": 2,
+  "grace_seconds": null,
+  "failing_votes": 3,
+  "success_votes": 1,
+  "recovery_success_votes": null
+}
