@@ -22,12 +22,7 @@ var snoozeModes = map[string]string{
 type monitorCall func(client *api.Client, id string) (api.MonitorDetail, []byte, error)
 
 func (a *app) newMonitorsCreateCommand() *cobra.Command {
-	var (
-		name      string
-		every     string
-		grace     string
-		heartbeat bool
-	)
+	var flags createFlags
 
 	create := &cobra.Command{
 		Use:   "create [url]",
@@ -44,7 +39,7 @@ A length is a number with s, m, h or d: 90s, 5m, 2h, 1d.`,
   pulseczar monitors create --heartbeat --name "Nightly backup" --every 1d --grace 1h`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			body, err := buildCreateBody(args, name, every, grace, heartbeat)
+			body, err := buildCreateBody(args, flags)
 			if err != nil {
 				return err
 			}
@@ -64,30 +59,39 @@ A length is a number with s, m, h or d: 90s, 5m, 2h, 1d.`,
 			return nil
 		},
 	}
-	create.Flags().StringVar(&name, "name", "", "the monitor's name (default: the address's host)")
-	create.Flags().StringVar(&every, "every", "", "how often to check, or how often the job pings")
-	create.Flags().StringVar(&grace, "grace", "", "heartbeat only: how late a ping may be")
-	create.Flags().BoolVar(&heartbeat, "heartbeat", false, "create a heartbeat monitor instead of checking an address")
+	create.Flags().StringVar(&flags.name, "name", "", "the monitor's name (default: the address's host)")
+	create.Flags().StringVar(&flags.every, "every", "", "how often to check, or how often the job pings")
+	create.Flags().StringVar(&flags.grace, "grace", "", "heartbeat only: how late a ping may be")
+	create.Flags().BoolVar(&flags.heartbeat, "heartbeat", false, "create a heartbeat monitor instead of checking an address")
 
 	return create
 }
 
-// buildCreateBody turns the arguments and flags into an http or heartbeat body.
-func buildCreateBody(args []string, name, every, grace string, heartbeat bool) (api.MonitorCreate, error) {
-	if heartbeat {
-		return buildHeartbeatBody(args, name, every, grace)
-	}
-
-	return buildHTTPBody(args, name, every, grace)
+// createFlags are the flags of `monitors create`.
+type createFlags struct {
+	name      string
+	every     string
+	grace     string
+	heartbeat bool
 }
 
-func buildHTTPBody(args []string, name, every, grace string) (api.MonitorCreate, error) {
+// buildCreateBody picks the http or the heartbeat body from the flags.
+func buildCreateBody(args []string, flags createFlags) (api.MonitorCreate, error) {
+	if flags.heartbeat {
+		return buildHeartbeatBody(args, flags)
+	}
+
+	return buildHTTPBody(args, flags)
+}
+
+func buildHTTPBody(args []string, flags createFlags) (api.MonitorCreate, error) {
 	if len(args) != 1 {
 		return api.MonitorCreate{}, usageError("give the address to check, or use --heartbeat")
 	}
-	if grace != "" {
+	if flags.grace != "" {
 		return api.MonitorCreate{}, usageError("--grace is for heartbeat monitors only")
 	}
+	every := flags.every
 	if every == "" {
 		every = defaultHTTPEvery
 	}
@@ -99,30 +103,30 @@ func buildHTTPBody(args []string, name, every, grace string) (api.MonitorCreate,
 
 	return api.MonitorCreate{
 		Type:            "http",
-		Name:            name,
+		Name:            flags.name,
 		URL:             args[0],
 		IntervalSeconds: seconds,
 		TimeoutSeconds:  httpTimeoutSecond,
 	}, nil
 }
 
-func buildHeartbeatBody(args []string, name, every, grace string) (api.MonitorCreate, error) {
+func buildHeartbeatBody(args []string, flags createFlags) (api.MonitorCreate, error) {
 	if len(args) != 0 {
 		return api.MonitorCreate{}, usageError("a heartbeat monitor has no address to check")
 	}
-	if name == "" || every == "" {
+	if flags.name == "" || flags.every == "" {
 		return api.MonitorCreate{}, usageError("--heartbeat needs --name and --every")
 	}
 
-	seconds, err := parseSeconds(every)
+	seconds, err := parseSeconds(flags.every)
 	if err != nil {
 		return api.MonitorCreate{}, usageError("--every: %s", err)
 	}
 
-	body := api.MonitorCreate{Type: "heartbeat", Name: name, IntervalSeconds: seconds}
+	body := api.MonitorCreate{Type: "heartbeat", Name: flags.name, IntervalSeconds: seconds}
 
-	if grace != "" {
-		graceSeconds, err := parseSeconds(grace)
+	if flags.grace != "" {
+		graceSeconds, err := parseSeconds(flags.grace)
 		if err != nil {
 			return api.MonitorCreate{}, usageError("--grace: %s", err)
 		}

@@ -133,6 +133,10 @@ func (a *app) signedInClient() (*api.Client, error) {
 		return nil, fail(err)
 	}
 
+	return a.clientFor(found)
+}
+
+func (a *app) clientFor(found settings) (*api.Client, error) {
 	if found.Token == "" {
 		return nil, notSignedIn()
 	}

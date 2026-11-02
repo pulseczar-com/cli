@@ -146,7 +146,7 @@ func (a *app) runAuthStatus(cmd *cobra.Command, _ []string) error {
 		return fail(err)
 	}
 
-	client, err := a.signedInClient()
+	client, err := a.clientFor(found)
 	if err != nil {
 		return err
 	}
