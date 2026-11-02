@@ -261,3 +261,31 @@ func runCLIWithConfig(t *testing.T, czar *fakeCzar, path string, args ...string)
 
 	return result{stdout: out.String(), stderr: errOut.String(), code: code}
 }
+
+func TestTokenPrintsTheSavedTokenAndNothingElse(t *testing.T) {
+	czar := newFakeCzar(t, nil)
+	path := t.TempDir() + "/config.json"
+	if err := config.Save(path, config.File{URL: czar.server.URL, Token: "1|saved"}); err != nil {
+		t.Fatal(err)
+	}
+
+	run := runCLIWithConfig(t, czar, path, "auth", "token")
+
+	if run.code != 0 || run.stdout != "1|saved\n" || run.stderr != "" {
+		t.Errorf("exit %d, stdout %q, stderr %q", run.code, run.stdout, run.stderr)
+	}
+	if len(czar.requests) != 0 {
+		t.Errorf("%d requests, want none", len(czar.requests))
+	}
+}
+
+func TestTokenWithNothingSavedIsNotSignedIn(t *testing.T) {
+	czar := newFakeCzar(t, nil)
+
+	run := runCLI(t, czar, options{noToken: true}, "auth", "token")
+
+	if run.code != exitAuth || run.stdout != "" {
+		t.Errorf("exit %d, stdout %q", run.code, run.stdout)
+	}
+	assertErrorLines(t, run.stderr, "not_signed_in")
+}

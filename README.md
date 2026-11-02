@@ -31,9 +31,17 @@ Open the address, sign in to Pulseczar if asked, type the code, choose **Read on
 | | |
 | --- | --- |
 | `pulseczar auth status` | Show the account you are signed in to. |
+| `pulseczar auth token` | Print the saved token and nothing else. |
 | `pulseczar auth logout` | Revoke the token on the server and delete it from this computer. |
 | `PULSECZAR_TOKEN` | Use this token instead of the saved one (for CI and scripts). |
 | `PULSECZAR_URL` | Use another Pulseczar server, such as a local one. |
+
+## Use in CI
+
+1. Sign in once on your computer with `pulseczar auth login`. Choose **Read only** unless the job writes.
+2. Run `pulseczar auth token` and store the output as the CI secret `PULSECZAR_TOKEN`.
+
+A token expires after 90 days without use.
 
 ## Commands
 
