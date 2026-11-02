@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/chrisggraham/pulseczar-cli/internal/api"
+	"github.com/pulseczar-com/cli/internal/api"
 )
 
 // Exit codes.

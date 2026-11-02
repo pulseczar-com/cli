@@ -7,10 +7,7 @@
 You need Go 1.24 or newer.
 
 ```sh
-git clone <this repository> pulseczar-cli
-cd pulseczar-cli
-go build -o pulseczar .
-# then put ./pulseczar on your PATH
+go install github.com/pulseczar-com/cli/cmd/pulseczar@latest
 ```
 
 ## Sign in

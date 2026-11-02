@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/chrisggraham/pulseczar-cli/internal/api"
-	"github.com/chrisggraham/pulseczar-cli/internal/render"
+	"github.com/pulseczar-com/cli/internal/api"
+	"github.com/pulseczar-com/cli/internal/render"
 )
 
 // Every function here turns one API result into a render.View. A null value shows as "-".

@@ -6,8 +6,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/chrisggraham/pulseczar-cli/internal/cli"
-	"github.com/chrisggraham/pulseczar-cli/internal/config"
+	"github.com/pulseczar-com/cli/internal/cli"
+	"github.com/pulseczar-com/cli/internal/config"
 )
 
 const requestTimeout = 30 * time.Second

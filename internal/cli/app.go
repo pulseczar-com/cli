@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chrisggraham/pulseczar-cli/internal/api"
-	"github.com/chrisggraham/pulseczar-cli/internal/config"
-	"github.com/chrisggraham/pulseczar-cli/internal/render"
+	"github.com/pulseczar-com/cli/internal/api"
+	"github.com/pulseczar-com/cli/internal/config"
+	"github.com/pulseczar-com/cli/internal/render"
 	"github.com/spf13/cobra"
 )
 

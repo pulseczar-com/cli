@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/chrisggraham/pulseczar-cli/internal/api"
-	"github.com/chrisggraham/pulseczar-cli/internal/config"
+	"github.com/pulseczar-com/cli/internal/api"
+	"github.com/pulseczar-com/cli/internal/config"
 	"github.com/spf13/cobra"
 )
 

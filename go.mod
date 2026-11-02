@@ -1,4 +1,4 @@
-module github.com/chrisggraham/pulseczar-cli
+module github.com/pulseczar-com/cli
 
 go 1.24
 

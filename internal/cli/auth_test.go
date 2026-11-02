@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chrisggraham/pulseczar-cli/internal/config"
+	"github.com/pulseczar-com/cli/internal/config"
 )
 
 // pollWord is a poll answer that carries one of the RFC 8628 words.
