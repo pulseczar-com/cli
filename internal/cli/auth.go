@@ -30,7 +30,7 @@ func (a *app) newAuthCommand() *cobra.Command {
 			Long: `Sign in by approving a code in your browser.
 
 The command prints an address and a code. Open the address, sign in to
-Pulseczar if asked, type the code, choose Read only or Read and write, and
+PulseCzar if asked, type the code, choose Read only or Read and write, and
 approve. The command waits, then saves the token to ~/.config/pulseczar/config.json.`,
 			Example: `  pulseczar auth login`,
 			Args:    cobra.NoArgs,

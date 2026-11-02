@@ -1,4 +1,4 @@
-// Command pulseczar watches and manages Pulseczar monitors from the terminal.
+// Command pulseczar watches and manages PulseCzar monitors from the terminal.
 package main
 
 import (

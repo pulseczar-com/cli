@@ -1,4 +1,4 @@
-// Package api is the client for the Pulseczar v1 JSON API.
+// Package api is the client for the PulseCzar v1 JSON API.
 package api
 
 import (

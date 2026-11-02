@@ -1,6 +1,6 @@
 # pulseczar
 
-`pulseczar` shows and manages your [Pulseczar](https://pulseczar.com) monitors from the terminal. It is a single binary with no runtime.
+`pulseczar` shows and manages your [PulseCzar](https://pulseczar.com) monitors from the terminal. It is a single binary with no runtime.
 
 ## Install from source
 
@@ -26,7 +26,7 @@ Open: https://pulseczar.com/cli
 Code: BCDF-GHJK
 ```
 
-Open the address, sign in to Pulseczar if asked, type the code, choose **Read only** or **Read and write**, and approve. The command then saves a token to `~/.config/pulseczar/config.json` (mode 0600). No token is created or shown on the web.
+Open the address, sign in to PulseCzar if asked, type the code, choose **Read only** or **Read and write**, and approve. The command then saves a token to `~/.config/pulseczar/config.json` (mode 0600). No token is created or shown on the web.
 
 | | |
 | --- | --- |
@@ -34,7 +34,7 @@ Open the address, sign in to Pulseczar if asked, type the code, choose **Read on
 | `pulseczar auth token` | Print the saved token and nothing else. |
 | `pulseczar auth logout` | Revoke the token on the server and delete it from this computer. |
 | `PULSECZAR_TOKEN` | Use this token instead of the saved one (for CI and scripts). |
-| `PULSECZAR_URL` | Use another Pulseczar server, such as a local one. |
+| `PULSECZAR_URL` | Use another PulseCzar server, such as a local one. |
 
 ## Use in CI
 

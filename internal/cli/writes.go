@@ -29,8 +29,8 @@ func (a *app) newMonitorsCreateCommand() *cobra.Command {
 		Short: "Create a monitor that checks an address, or one that waits for a heartbeat",
 		Long: `Create a monitor.
 
-With an address, Pulseczar checks it from several locations every --every
-(default ` + defaultHTTPEvery + `). With --heartbeat, Pulseczar waits for your job to ping a
+With an address, PulseCzar checks it from several locations every --every
+(default ` + defaultHTTPEvery + `). With --heartbeat, PulseCzar waits for your job to ping a
 secret address and raises an incident when a ping is late by more than --grace.
 
 A length is a number with s, m, h or d: 90s, 5m, 2h, 1d.`,

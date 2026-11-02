@@ -57,15 +57,15 @@ func Run(args []string, env Env) int {
 func (a *app) newRoot() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "pulseczar",
-		Short: "Watch and manage your Pulseczar monitors from the terminal",
-		Long: `Watch and manage your Pulseczar monitors from the terminal.
+		Short: "Watch and manage your PulseCzar monitors from the terminal",
+		Long: `Watch and manage your PulseCzar monitors from the terminal.
 
 Sign in once with "pulseczar auth login". Output is a table on a terminal, the
 compact form when piped, and the API body unchanged with --json.
 
 Environment:
   PULSECZAR_TOKEN  use this token instead of the saved sign-in
-  PULSECZAR_URL    use another Pulseczar server (default ` + config.DefaultURL + `)
+  PULSECZAR_URL    use another PulseCzar server (default ` + config.DefaultURL + `)
 
 Exit codes: 0 ok, 1 error, 2 usage, 4 not signed in or not allowed.`,
 		SilenceErrors: true,
