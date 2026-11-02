@@ -85,7 +85,7 @@ func fromAPI(err *api.Error) *commandError {
 	return failure
 }
 
-// invalidDetails lists a 422's messages by field, and the monitor an address already belongs to.
+// invalidDetails lists a 422's messages by field.
 func invalidDetails(err *api.Error) []string {
 	var lines []string
 
@@ -93,10 +93,6 @@ func invalidDetails(err *api.Error) []string {
 		for _, message := range err.Fields[field] {
 			lines = append(lines, fmt.Sprintf("%s: %s", field, message))
 		}
-	}
-
-	if err.DuplicateOf != nil {
-		lines = append(lines, fmt.Sprintf("duplicate_of: %s %s", err.DuplicateOf.ID, err.DuplicateOf.Name))
 	}
 
 	return lines

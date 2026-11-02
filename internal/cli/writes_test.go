@@ -154,14 +154,14 @@ func TestAWriteWithJSONPrintsTheBodyUnchanged(t *testing.T) {
 	}
 }
 
-func TestA422PrintsTheFieldMessagesAndThePlanLimit(t *testing.T) {
+func TestA422PrintsTheFieldMessages(t *testing.T) {
 	cases := []struct {
 		name    string
 		fixture string
 		golden  string
 	}{
 		{"plan limit", "invalid_plan", "create_plan_limit.stderr"},
-		{"duplicate address", "invalid_duplicate", "create_duplicate.stderr"},
+		{"field error", "invalid_duplicate", "create_field_error.stderr"},
 	}
 
 	for _, tc := range cases {

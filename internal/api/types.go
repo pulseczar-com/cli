@@ -75,7 +75,6 @@ type IncidentSummary struct {
 	StartedAt    string             `json:"started_at"`
 	FailingSince *string            `json:"failing_since"`
 	EndedAt      *string            `json:"ended_at"`
-	IsOpen       bool               `json:"is_open"`
 	StatusWord   string             `json:"status_word"`
 	DurationWord *string            `json:"duration_word"`
 	Scope        *string            `json:"scope"`

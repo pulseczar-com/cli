@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"strings"
-
 	"github.com/chrisggraham/pulseczar-cli/internal/api"
 	"github.com/spf13/cobra"
 )
@@ -228,7 +226,7 @@ func (a *app) newMonitorsSnoozeCommand() *cobra.Command {
 			return nil
 		},
 	}
-	snooze.Flags().StringVar(&length, "for", "", "how long: "+strings.Join([]string{"1h", "24h", "next", "forever"}, ", "))
+	snooze.Flags().StringVar(&length, "for", "", "how long: 1h, 24h, next or forever")
 	_ = snooze.MarkFlagRequired("for")
 
 	return snooze

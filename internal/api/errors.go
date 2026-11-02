@@ -26,17 +26,9 @@ type Error struct {
 	Message string
 	// Fields holds the 422 messages by field name, such as "plan" or "url".
 	Fields map[string][]string
-	// DuplicateOf names the monitor that already has the address, on a 422.
-	DuplicateOf *MonitorRef
 }
 
 func (e *Error) Error() string { return e.Message }
-
-// MonitorRef is a monitor named by id and name.
-type MonitorRef struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
 
 // FieldNames returns the field names of a 422 in a stable order.
 func (e *Error) FieldNames() []string {
@@ -56,9 +48,8 @@ func (e *NetworkError) Error() string { return e.Err.Error() }
 
 func newError(status int, raw []byte) *Error {
 	var body struct {
-		Message     string              `json:"message"`
-		Errors      map[string][]string `json:"errors"`
-		DuplicateOf *MonitorRef         `json:"duplicate_of"`
+		Message string              `json:"message"`
+		Errors  map[string][]string `json:"errors"`
 	}
 	// A body that is not JSON, such as a proxy's error page, leaves the fields empty.
 	_ = json.Unmarshal(raw, &body)
@@ -69,11 +60,10 @@ func newError(status int, raw []byte) *Error {
 	}
 
 	return &Error{
-		Status:      status,
-		Code:        codeForStatus(status),
-		Message:     message,
-		Fields:      body.Errors,
-		DuplicateOf: body.DuplicateOf,
+		Status:  status,
+		Code:    codeForStatus(status),
+		Message: message,
+		Fields:  body.Errors,
 	}
 }
 
