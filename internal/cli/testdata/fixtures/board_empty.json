@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-01T10:00:00Z",
+  "summary": {
+    "class": "neutral",
+    "text": "No monitors yet"
+  },
+  "stale_at": null,
+  "counts": {
+    "up": 0,
+    "down": 0,
+    "stale": 0,
+    "paused": 0,
+    "new": 0,
+    "total": 0
+  },
+  "monitors": []
+}

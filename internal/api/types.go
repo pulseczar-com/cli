@@ -32,6 +32,10 @@ type Status struct {
 
 // Board is GET /board.
 type Board struct {
+	Summary struct {
+		Text string `json:"text"`
+	} `json:"summary"`
+	Counts   Counts           `json:"counts"`
 	Monitors []MonitorSummary `json:"monitors"`
 }
 
@@ -44,6 +48,8 @@ type MonitorSummary struct {
 	Status   string   `json:"status"`
 	Word     string   `json:"word"`
 	Uptime24 *float64 `json:"uptime_24h"`
+	// FootLeft is the text on the web card's footer, such as the last error.
+	FootLeft string `json:"foot_left"`
 }
 
 // MonitorDetail is GET /monitors/{id}, and the answer to every write.

@@ -1,0 +1,11 @@
+ ░ ▒ ▓ █  ╔═╗┬ ┬┬  ┌─┐┌─┐╔═╗┌─┐┌─┐┬─┐
+ ░ ▒ ▓ █  ╠═╝│ ││  └─┐├┤ ║  ┌─┘├─┤├┬┘
+ ░ ▒ ▓ █  ╩  └─┘┴─┘└─┘└─┘╚═╝└─┘┴ ┴┴└─  v1.2.3
+
+ ● No monitors yet     ada@example.com · Free · 4 of 5
+
+   No monitors yet.
+
+ Next
+  pulseczar monitors create https://example.com  add a monitor
+  pulseczar --help                               all commands

@@ -15,22 +15,24 @@ func (a *app) newStatusCommand() *cobra.Command {
 		Short:   "Show whether your monitors are up, with the counts",
 		Example: "  pulseczar status\n  pulseczar status --json",
 		Args:    cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			client, err := a.signedInClient()
-			if err != nil {
-				return err
-			}
-
-			status, raw, err := client.GetStatus()
-			if err != nil {
-				return fail(err)
-			}
-
-			a.print(raw, statusView(status), func(t terminal) string { return t.statusScreen(status) })
-
-			return nil
-		},
+		RunE:    func(cmd *cobra.Command, _ []string) error { return a.showStatus() },
 	}
+}
+
+func (a *app) showStatus() error {
+	client, err := a.signedInClient()
+	if err != nil {
+		return err
+	}
+
+	status, raw, err := client.GetStatus()
+	if err != nil {
+		return fail(err)
+	}
+
+	a.print(raw, statusView(status), func(t terminal) string { return t.statusScreen(status) })
+
+	return nil
 }
 
 func (a *app) newMonitorsCommand() *cobra.Command {

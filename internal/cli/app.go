@@ -23,6 +23,13 @@ const (
 // guideURL is the web page about the command line.
 const guideURL = "https://pulseczar.com/cli"
 
+// rootExamples ends the top help.
+const rootExamples = `  pulseczar                                         see your monitors
+  pulseczar monitors list --status down             only the monitors that are down
+  pulseczar monitors create https://example.com     add a monitor
+  pulseczar status --json                           the status as JSON, for scripts
+`
+
 // Env is everything the commands take from the outside, so tests can supply it.
 type Env struct {
 	Stdout, Stderr io.Writer
@@ -39,6 +46,8 @@ type Env struct {
 	Hostname string
 	// Version is the build's version, set when the program is linked.
 	Version string
+	// Width is the width of the terminal in columns; 0 when unknown.
+	Width int
 }
 
 type app struct {
@@ -51,7 +60,8 @@ func Run(args []string, env Env) int {
 	a := &app{env: env}
 
 	root := a.newRoot()
-	root.SetArgs(args)
+	// A nil slice would make cobra read the process's own arguments.
+	root.SetArgs(append([]string{}, args...))
 	root.SetOut(env.Stdout)
 	root.SetErr(env.Stderr)
 
@@ -79,11 +89,15 @@ Environment:
 
 Exit codes: 0 ok, 1 error, 2 usage, 4 not signed in or not allowed.`,
 		Version:       a.env.Version,
+		RunE:          func(cmd *cobra.Command, _ []string) error { return a.runHome() },
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
 	root.SetVersionTemplate("pulseczar {{.Version}}\n")
-	root.SetUsageTemplate(root.UsageTemplate() + "\nGuide: " + guideURL + "\n")
+	root.SetUsageTemplate(root.UsageTemplate() + `{{if not .HasParent}}
+Examples:
+` + rootExamples + `{{end}}
+Guide: ` + guideURL + "\n")
 	root.CompletionOptions.DisableDefaultCmd = true
 	root.PersistentFlags().BoolVar(&a.asJSON, "json", false, "print the API body unchanged")
 

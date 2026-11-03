@@ -27,6 +27,11 @@ func main() {
 		hostname = "pulseczar-cli"
 	}
 
+	width, _, err := term.GetSize(int(os.Stdout.Fd()))
+	if err != nil {
+		width = 0
+	}
+
 	os.Exit(cli.Run(os.Args[1:], cli.Env{
 		Stdout:           os.Stdout,
 		Stderr:           os.Stderr,
@@ -39,5 +44,6 @@ func main() {
 		Now:              time.Now,
 		Hostname:         hostname,
 		Version:          version,
+		Width:            width,
 	}))
 }

@@ -1,0 +1,16 @@
+ ░ ▒ ▓ █  ╔═╗┬ ┬┬  ┌─┐┌─┐╔═╗┌─┐┌─┐┬─┐
+ ░ ▒ ▓ █  ╠═╝│ ││  └─┐├┤ ║  ┌─┘├─┤├┬┘
+ ░ ▒ ▓ █  ╩  └─┘┴─┘└─┘└─┘╚═╝└─┘┴ ┴┴└─  v1.2.3
+
+ ● 1 monitor down     ada@example.com · Free · 4 of 5
+
+   ● Checkout, API   Down      87.5%
+   ● Nightly backup  Stale     -
+   ● Marketing site  Up        99.98%
+   ○ Old blog        Paused    100%
+
+ Next
+  pulseczar monitors show B2C4D6F8G1H3  see why it is down
+  pulseczar incidents list --open       open incidents
+  pulseczar monitors create <url>       add a monitor
+  pulseczar --help                      all commands

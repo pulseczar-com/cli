@@ -123,6 +123,7 @@ type options struct {
 	stderrTerminal bool
 	color          bool
 	noToken        bool
+	width          int
 	env            map[string]string
 }
 
@@ -155,6 +156,7 @@ func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
 		Now:              func() time.Time { return testNow },
 		Hostname:         "ada-laptop",
 		Version:          "1.2.3",
+		Width:            opts.width,
 	})
 	run.stdout, run.stderr = withStableURL(czar, out.String()), withStableURL(czar, errOut.String())
 
