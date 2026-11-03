@@ -102,7 +102,6 @@ Exit codes: 0 ok, 1 error, 2 usage, 4 not signed in or not allowed.`,
 Examples:
 ` + rootExamples + `{{end}}
 Guide: ` + guideURL + "\n")
-	root.CompletionOptions.DisableDefaultCmd = true
 	root.PersistentFlags().BoolVar(&a.asJSON, "json", false, "print the API body unchanged")
 
 	a.addGroupedCommands(root)

@@ -252,3 +252,15 @@ func TestAnUnknownCommandWithNoSuggestionKeepsTheHelpHint(t *testing.T) {
 		t.Errorf("stderr = %q, want %q", run.stderr, want)
 	}
 }
+
+func TestCompletionScriptsAreAvailableForEachShell(t *testing.T) {
+	for _, shell := range []string{"bash", "zsh", "fish"} {
+		t.Run(shell, func(t *testing.T) {
+			run := runCLI(t, newFakeCzar(t, nil), options{}, "completion", shell)
+
+			if run.code != 0 || !strings.Contains(run.stdout, "pulseczar") {
+				t.Errorf("exit %d, stdout %q", run.code, run.stdout)
+			}
+		})
+	}
+}

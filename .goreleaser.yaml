@@ -1,0 +1,67 @@
+# Release build. Run by .github/workflows/release.yml on a version tag.
+version: 2
+
+project_name: pulseczar
+
+before:
+  hooks:
+    - go mod tidy
+    - sh -c 'rm -rf completions && mkdir completions'
+    - sh -c 'go run ./cmd/pulseczar completion bash > completions/pulseczar.bash'
+    - sh -c 'go run ./cmd/pulseczar completion zsh > completions/_pulseczar'
+    - sh -c 'go run ./cmd/pulseczar completion fish > completions/pulseczar.fish'
+
+builds:
+  - id: pulseczar
+    main: ./cmd/pulseczar
+    binary: pulseczar
+    env:
+      - CGO_ENABLED=0
+    goos: [darwin, linux, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+archives:
+  - id: pulseczar
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - README.md
+      - completions/*
+
+checksum:
+  name_template: "{{ .ProjectName }}_{{ .Version }}_checksums.txt"
+
+release:
+  # A tag such as v0.1.0-rc.1 makes a pre-release.
+  prerelease: auto
+
+# The tap is pushed over SSH with a deploy key. Without the key the cask is
+# built but not uploaded, so a release works before the tap exists.
+homebrew_casks:
+  - name: pulseczar
+    homepage: https://pulseczar.com
+    description: Check and manage your PulseCzar monitors from the terminal
+    skip_upload: '{{ if .Env.HOMEBREW_TAP_DEPLOY_KEY }}false{{ else }}true{{ end }}'
+    repository:
+      owner: pulseczar-com
+      name: homebrew-tap
+      branch: main
+      git:
+        url: git@github.com:pulseczar-com/homebrew-tap.git
+        private_key: "{{ .Env.HOMEBREW_TAP_DEPLOY_KEY }}"
+    completions:
+      bash: completions/pulseczar.bash
+      zsh: completions/_pulseczar
+      fish: completions/pulseczar.fish
+    # The binary is not signed. This stops macOS from blocking it.
+    hooks:
+      post:
+        install_steps: |
+          on_macos do
+            run "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "{{ .StagedPath }}/pulseczar"]
+          end

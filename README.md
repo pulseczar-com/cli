@@ -2,13 +2,37 @@
 
 `pulseczar` shows and manages your [PulseCzar](https://pulseczar.com) monitors from the terminal. It is a single binary with no runtime.
 
-## Install from source
+## Install
 
-You need Go 1.24 or newer.
+Pick one. Each installs the same program.
+
+**Homebrew** (macOS and Linux):
+
+```sh
+brew install pulseczar-com/tap/pulseczar
+```
+
+This also installs completions for bash, zsh and fish.
+
+**Install script** (Linux and macOS). It checks the checksum and needs no sudo. It installs to `~/.local/bin`; set `PULSECZAR_BIN_DIR` to use another folder, or `PULSECZAR_VERSION` for a version other than the latest.
+
+```sh
+curl -fsSL https://pulseczar.com/install.sh | sh
+```
+
+**Download**: get the archive for your system from the [releases page](https://github.com/pulseczar-com/cli/releases) and put `pulseczar` on your `PATH`. Windows gets a zip.
+
+**Go** (1.24 or newer):
 
 ```sh
 go install github.com/pulseczar-com/cli/cmd/pulseczar@latest
 ```
+
+The program is not signed on macOS yet. Homebrew removes the quarantine flag for you. After a manual download, run `xattr -d com.apple.quarantine pulseczar` if macOS blocks it.
+
+### Completion
+
+Homebrew sets up completion. For other installs, run `pulseczar completion --help` and follow the steps for your shell.
 
 ## Sign in
 
@@ -112,3 +136,7 @@ Errors go to stderr as `error:` and `code:` lines. On a terminal they show as a 
 go test ./...                      # runs against a fake server; nothing calls production
 go test ./internal/cli -update     # rewrite the golden files after a change you meant to make
 ```
+
+## Release
+
+Push a tag such as `v1.2.3`. The workflow in `.github/workflows/release.yml` runs the tests, then GoReleaser, which builds the archives and `pulseczar_<version>_checksums.txt` and creates the GitHub release. A tag with a suffix (`v1.2.3-rc.1`) makes a pre-release. When the repository secret `HOMEBREW_TAP_DEPLOY_KEY` is set, GoReleaser also pushes the cask to `pulseczar-com/homebrew-tap` over SSH; without it the cask is built and not pushed.
