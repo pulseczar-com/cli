@@ -1,0 +1,6 @@
+{
+  "monitors": [
+    {"public_id": "C1C1C1C1C1C1", "name": "Billing API", "type": "http", "status": "up", "word": "UP", "uptime_24h": 100},
+    {"public_id": "D2D2D2D2D2D2", "name": "Billing job", "type": "heartbeat", "status": "up", "word": "UP", "uptime_24h": 100}
+  ]
+}

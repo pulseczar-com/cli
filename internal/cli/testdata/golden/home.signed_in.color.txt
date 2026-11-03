@@ -10,7 +10,7 @@
    <ESC>[90m○<ESC>[0m Old blog        <ESC>[90mPaused<ESC>[0m    100%
 
  Next
-  pulseczar monitors show B2C4D6F8G1H3  <ESC>[90msee why it is down<ESC>[0m
-  pulseczar incidents list --open       <ESC>[90mopen incidents<ESC>[0m
-  pulseczar monitors create <url>       <ESC>[90madd a monitor<ESC>[0m
-  pulseczar --help                      <ESC>[90mall commands<ESC>[0m
+  pulseczar monitors show 'Checkout, API'  <ESC>[90msee why it is down<ESC>[0m
+  pulseczar incidents --open               <ESC>[90mopen incidents<ESC>[0m
+  pulseczar monitors create <url>          <ESC>[90madd a monitor<ESC>[0m
+  pulseczar --help                         <ESC>[90mall commands<ESC>[0m

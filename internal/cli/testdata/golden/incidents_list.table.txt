@@ -2,4 +2,4 @@
  ● Checkout, API  Down      48 minutes ago  48m       4T9WQ8ZN2HJ5
  ● Checkout, API  Resolved  1 day ago       7m        6R8T0V2X4Z6B
 
-  Next page cursor  eyJpZCI6NDJ9
+  Next page: pulseczar incidents --cursor eyJpZCI6NDJ9

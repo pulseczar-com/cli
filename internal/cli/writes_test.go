@@ -3,6 +3,7 @@ package cli
 import (
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -108,15 +109,16 @@ func TestSnoozeAndUnsnoozeSendTheMuteMode(t *testing.T) {
 		args []string
 		mode string
 	}{
-		{[]string{"snooze", "--for", "1h"}, "1h"},
-		{[]string{"snooze", "--for", "24h"}, "24h"},
-		{[]string{"snooze", "--for", "next"}, "next_incident"},
-		{[]string{"snooze", "--for", "forever"}, "forever"},
+		{[]string{"snooze"}, "1h"},
+		{[]string{"snooze", "1h"}, "1h"},
+		{[]string{"snooze", "24h"}, "24h"},
+		{[]string{"snooze", "next"}, "next_incident"},
+		{[]string{"snooze", "forever"}, "forever"},
 		{[]string{"unsnooze"}, "off"},
 	}
 
 	for _, tc := range cases {
-		t.Run(tc.mode, func(t *testing.T) {
+		t.Run(strings.Join(tc.args, " "), func(t *testing.T) {
 			czar := newFakeCzar(t, map[string][]reply{"POST /api/v1/monitors/7K3M9XQ2T4VB/mute": ok("monitor_snoozed")})
 			args := append([]string{"monitors", tc.args[0], "7K3M9XQ2T4VB"}, tc.args[1:]...)
 
@@ -135,13 +137,12 @@ func TestSnoozeAndUnsnoozeSendTheMuteMode(t *testing.T) {
 func TestSnoozeNeedsAKnownLength(t *testing.T) {
 	czar := newFakeCzar(t, nil)
 
-	missing := runCLI(t, czar, options{}, "monitors", "snooze", "7K3M9XQ2T4VB")
-	unknown := runCLI(t, czar, options{}, "monitors", "snooze", "7K3M9XQ2T4VB", "--for", "2h")
+	unknown := runCLI(t, czar, options{}, "monitors", "snooze", "7K3M9XQ2T4VB", "2h")
 
-	if missing.code != exitUsage {
-		t.Errorf("missing --for: exit %d, stderr %q", missing.code, missing.stderr)
+	assertUsageError(t, unknown, `the snooze length must be one of 1h, 24h, next, forever; got "2h"`)
+	if len(czar.requests) != 0 {
+		t.Errorf("a bad length reached the server: %+v", czar.requests)
 	}
-	assertUsageError(t, unknown, `--for must be one of 1h, 24h, next, forever; got "2h"`)
 }
 
 func TestAWriteWithJSONPrintsTheBodyUnchanged(t *testing.T) {

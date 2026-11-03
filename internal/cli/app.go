@@ -44,6 +44,8 @@ type Env struct {
 	// Now is the clock for relative times; its zone is the zone times are shown in.
 	Now      func() time.Time
 	Hostname string
+	// OpenBrowser shows an address in the person's browser.
+	OpenBrowser func(url string) error
 	// Version is the build's version, set when the program is linked.
 	Version string
 	// Width is the width of the terminal in columns; 0 when unknown.
@@ -110,18 +112,20 @@ Guide: ` + guideURL + "\n")
 func (a *app) addGroupedCommands(root *cobra.Command) {
 	groups := []struct {
 		id, title string
-		command   *cobra.Command
+		commands  []*cobra.Command
 	}{
-		{"start", "Start", a.newStatusCommand()},
-		{"monitors", "Monitors", a.newMonitorsCommand()},
-		{"incidents", "Incidents", a.newIncidentsCommand()},
-		{"account", "Account", a.newAuthCommand()},
+		{"start", "Start", []*cobra.Command{a.newStatusCommand(), a.newOpenCommand()}},
+		{"monitors", "Monitors", []*cobra.Command{a.newMonitorsCommand()}},
+		{"incidents", "Incidents", []*cobra.Command{a.newIncidentsCommand()}},
+		{"account", "Account", []*cobra.Command{a.newAuthCommand()}},
 	}
 
 	for _, group := range groups {
 		root.AddGroup(&cobra.Group{ID: group.id, Title: group.title})
-		group.command.GroupID = group.id
-		root.AddCommand(group.command)
+		for _, command := range group.commands {
+			command.GroupID = group.id
+			root.AddCommand(command)
+		}
 	}
 
 	root.SetHelpCommandGroupID("start")

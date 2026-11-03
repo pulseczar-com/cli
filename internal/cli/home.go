@@ -222,11 +222,11 @@ func nextSteps(monitors []api.MonitorSummary) []nextStep {
 
 	first := monitors[0]
 	if problemRank(first.Word) <= problemRank("stale") {
-		steps = append(steps, nextStep{"pulseczar monitors show " + first.ID, "see why it is " + statusKey(first.Word)})
+		steps = append(steps, nextStep{"pulseczar monitors show " + shellWord(first.Name), "see why it is " + statusKey(first.Word)})
 	}
 
 	return append(steps,
-		nextStep{"pulseczar incidents list --open", "open incidents"},
+		nextStep{"pulseczar incidents --open", "open incidents"},
 		nextStep{"pulseczar monitors create <url>", "add a monitor"},
 		nextStep{"pulseczar --help", "all commands"},
 	)

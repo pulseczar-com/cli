@@ -306,7 +306,7 @@ func (t terminal) createdScreen(monitor api.MonitorDetail) string {
 	return out
 }
 
-func (t terminal) incidentListScreen(page api.IncidentList) string {
+func (t terminal) incidentListScreen(page api.IncidentList, filter api.IncidentFilter) string {
 	if len(page.Incidents) == 0 {
 		return "No incidents.\n"
 	}
@@ -331,7 +331,7 @@ func (t terminal) incidentListScreen(page api.IncidentList) string {
 
 	out := t.withMarks(t.style.Align(rows), words)
 	if page.HasMore && page.NextCursor != nil {
-		out += fmt.Sprintf("\n  Next page cursor  %s\n", *page.NextCursor)
+		out += fmt.Sprintf("\n  Next page: %s\n", nextPageCommand(filter, *page.NextCursor))
 	}
 
 	return out
@@ -372,4 +372,29 @@ func (t terminal) locationCell(location api.IncidentLocation) render.Cell {
 	state := locationState(location)
 
 	return render.Cell{Text: state, Color: locationColors[state]}
+}
+
+// nextPageCommand is the full command that shows the page after this one.
+func nextPageCommand(filter api.IncidentFilter, cursor string) string {
+	words := []string{"pulseczar", "incidents"}
+	if filter.Open {
+		words = append(words, "--open")
+	}
+	if filter.Range != "" {
+		words = append(words, "--since", filter.Range)
+	}
+	if filter.MonitorID != "" {
+		words = append(words, "--monitor", filter.MonitorID)
+	}
+
+	return strings.Join(append(words, "--cursor", shellWord(cursor)), " ")
+}
+
+// shellWord quotes a word only when a shell would split or change it.
+func shellWord(word string) string {
+	if strings.Trim(word, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_=.,:/@") == "" {
+		return word
+	}
+
+	return "'" + strings.ReplaceAll(word, "'", `'\''`) + "'"
 }

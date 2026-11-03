@@ -36,13 +36,19 @@ func (a *app) showStatus() error {
 }
 
 func (a *app) newMonitorsCommand() *cobra.Command {
+	list := a.newMonitorsListCommand()
+
 	monitors := &cobra.Command{
 		Use:   "monitors",
 		Short: "List, show and change monitors",
+		Long:  "List, show and change monitors. Run alone, it lists them, as \"monitors list\" does.",
+		Args:  cobra.NoArgs,
+		RunE:  list.RunE,
 	}
+	monitors.Flags().AddFlagSet(list.Flags())
 
 	monitors.AddCommand(
-		a.newMonitorsListCommand(),
+		list,
 		a.newMonitorsShowCommand(),
 		a.newMonitorsCreateCommand(),
 		a.newMonitorsPauseCommand(),
@@ -58,8 +64,9 @@ func (a *app) newMonitorsListCommand() *cobra.Command {
 	var status string
 
 	list := &cobra.Command{
-		Use:   "list",
-		Short: "List your monitors",
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List your monitors",
 		Example: `  pulseczar monitors list
   pulseczar monitors list --status down
   pulseczar monitors list --json`,
@@ -108,17 +115,19 @@ func withStatus(monitors []api.MonitorSummary, status string) []api.MonitorSumma
 
 func (a *app) newMonitorsShowCommand() *cobra.Command {
 	return &cobra.Command{
-		Use:     "show <id>",
-		Short:   "Show one monitor",
-		Example: "  pulseczar monitors show 7K3M9XQ2T4VB\n  pulseczar monitors show 7K3M9XQ2T4VB --json",
-		Args:    exactlyOneID("a monitor id", "pulseczar monitors list"),
+		Use:               "show <monitor>",
+		Short:             "Show one monitor",
+		Long:              "Show one monitor. <monitor> is its id, its name, or the start of its name.",
+		Example:           "  pulseczar monitors show checkout\n  pulseczar monitors show 7K3M9XQ2T4VB --json",
+		Args:              monitorArgs(0),
+		ValidArgsFunction: a.completeMonitorNames,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, err := a.signedInClient()
+			client, id, err := a.signedInMonitor(args[0])
 			if err != nil {
 				return err
 			}
 
-			monitor, raw, err := client.GetMonitor(args[0])
+			monitor, raw, err := client.GetMonitor(id)
 			if err != nil {
 				return fail(err)
 			}
@@ -131,12 +140,18 @@ func (a *app) newMonitorsShowCommand() *cobra.Command {
 }
 
 func (a *app) newIncidentsCommand() *cobra.Command {
+	list := a.newIncidentsListCommand()
+
 	incidents := &cobra.Command{
 		Use:   "incidents",
 		Short: "List and show incidents",
+		Long:  "List and show incidents. Run alone, it lists them, as \"incidents list\" does.",
+		Args:  cobra.NoArgs,
+		RunE:  list.RunE,
 	}
+	incidents.Flags().AddFlagSet(list.Flags())
 
-	incidents.AddCommand(a.newIncidentsListCommand(), a.newIncidentsShowCommand())
+	incidents.AddCommand(list, a.newIncidentsShowCommand())
 
 	return incidents
 }
@@ -147,10 +162,10 @@ func (a *app) newIncidentsListCommand() *cobra.Command {
 	list := &cobra.Command{
 		Use:   "list",
 		Short: "List incidents across your monitors, newest first",
-		Example: `  pulseczar incidents list
-  pulseczar incidents list --open
-  pulseczar incidents list --since 24h
-  pulseczar incidents list --monitor 7K3M9XQ2T4VB`,
+		Example: `  pulseczar incidents
+  pulseczar incidents --open
+  pulseczar incidents --since 24h
+  pulseczar incidents --monitor checkout`,
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			client, err := a.signedInClient()
@@ -158,20 +173,27 @@ func (a *app) newIncidentsListCommand() *cobra.Command {
 				return err
 			}
 
+			if filter.MonitorID != "" {
+				if filter.MonitorID, err = resolveMonitor(client, filter.MonitorID); err != nil {
+					return err
+				}
+			}
+
 			incidents, raw, err := client.ListIncidents(filter)
 			if err != nil {
 				return fail(err)
 			}
 
-			a.print(raw, incidentListView(incidents), func(t terminal) string { return t.incidentListScreen(incidents) })
+			a.print(raw, incidentListView(incidents), func(t terminal) string { return t.incidentListScreen(incidents, filter) })
 
 			return nil
 		},
 	}
 	list.Flags().BoolVar(&filter.Open, "open", false, "only incidents that are still open")
 	list.Flags().StringVar(&filter.Range, "since", "", "only this period: 24h, 7d, 30d, 90d, all or a count of seconds")
-	list.Flags().StringVar(&filter.MonitorID, "monitor", "", "only this monitor's incidents")
+	list.Flags().StringVar(&filter.MonitorID, "monitor", "", "only this monitor's incidents: its name or id")
 	list.Flags().StringVar(&filter.Cursor, "cursor", "", "the next_cursor of the previous page")
+	_ = list.RegisterFlagCompletionFunc("monitor", a.completeMonitorFlag)
 
 	return list
 }

@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"net/http"
 	"net/http/httptest"
@@ -110,6 +111,7 @@ type result struct {
 	stdout, stderr string
 	code           int
 	sleeps         []time.Duration
+	opened         []string
 	configPath     string
 }
 
@@ -124,6 +126,7 @@ type options struct {
 	color          bool
 	noToken        bool
 	width          int
+	browserFails   bool
 	env            map[string]string
 }
 
@@ -155,8 +158,16 @@ func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
 		Sleep:            func(d time.Duration) { run.sleeps = append(run.sleeps, d) },
 		Now:              func() time.Time { return testNow },
 		Hostname:         "ada-laptop",
-		Version:          "1.2.3",
-		Width:            opts.width,
+		OpenBrowser: func(address string) error {
+			if opts.browserFails {
+				return errors.New("no browser")
+			}
+			run.opened = append(run.opened, address)
+
+			return nil
+		},
+		Version: "1.2.3",
+		Width:   opts.width,
 	})
 	run.stdout, run.stderr = withStableURL(czar, out.String()), withStableURL(czar, errOut.String())
 

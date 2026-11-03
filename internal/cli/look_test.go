@@ -147,10 +147,10 @@ func TestParserErrorsUsePlainWords(t *testing.T) {
 		args    []string
 		message string
 	}{
-		{[]string{"monitors", "show"}, "give a monitor id; run `pulseczar monitors list` to see them"},
-		{[]string{"monitors", "pause"}, "give a monitor id; run `pulseczar monitors list` to see them"},
+		{[]string{"monitors", "show"}, "give a monitor name or id; run `pulseczar monitors list` to see them"},
+		{[]string{"monitors", "pause"}, "give a monitor name or id; run `pulseczar monitors list` to see them"},
 		{[]string{"incidents", "show"}, "give an incident id; run `pulseczar incidents list` to see them"},
-		{[]string{"monitors", "show", "a", "b"}, "give only one id, not 2"},
+		{[]string{"monitors", "show", "a", "b"}, "too many arguments: got 2, want at most 1"},
 	}
 
 	for _, tc := range cases {

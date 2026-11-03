@@ -45,15 +45,18 @@ A token expires after 90 days without use.
 | Command | What it does |
 | --- | --- |
 | `status` | Whether your monitors are up, with the counts. |
-| `monitors list [--status up\|down\|stale\|paused\|new]` | List your monitors. |
-| `monitors show <id>` | One monitor, with its recent incidents. |
-| `incidents list [--open] [--since 24h] [--monitor <id>]` | Incidents, newest first, 25 to a page (`--cursor` for the next page). |
+| `monitors [--status up\|down\|stale\|paused\|new]` | List your monitors (`monitors list` or `monitors ls` do the same). |
+| `monitors show <monitor>` | One monitor, with its recent incidents. |
+| `incidents [--open] [--since 24h] [--monitor <monitor>]` | Incidents, newest first, 25 to a page. On a terminal the last line is the command for the next page (`--cursor`). |
 | `incidents show <id>` | One incident and the locations that saw it. |
 | `monitors create <url> [--name <name>] [--every 5m]` | Check an address. |
 | `monitors create --heartbeat --name <name> --every 1d [--grace 1h]` | Wait for your job to ping. |
-| `monitors pause <id>` / `monitors resume <id>` | Stop or restart a monitor. |
-| `monitors snooze <id> --for 1h\|24h\|next\|forever` | Snooze alerts; the monitor keeps checking. |
-| `monitors unsnooze <id>` | Turn alerts back on. |
+| `monitors pause <monitor>` / `monitors resume <monitor>` | Stop or restart a monitor. |
+| `monitors snooze <monitor> [1h\|24h\|next\|forever]` | Snooze alerts (1h if you give no length); the monitor keeps checking. |
+| `monitors unsnooze <monitor>` | Turn alerts back on. |
+| `open [monitor]` | Open the dashboard, or one monitor's page, in your browser. |
+
+`<monitor>` is a monitor's id, its name, or the start of its name, in any case. Two monitors that match are an error that lists both.
 
 Writes need a **Read and write** sign-in. `pulseczar <command> --help` shows flags and examples.
 

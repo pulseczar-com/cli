@@ -10,7 +10,13 @@ const (
 	httpTimeoutSecond = 10 // The server's longest allowed timeout; the CLI has no flag for it.
 )
 
-// snoozeModes maps the --for words to the modes Czar's mute route takes.
+// defaultSnooze is the length used when the person gives none.
+const defaultSnooze = "1h"
+
+// snoozeLengths are the words a person may give, in the order the help lists them.
+var snoozeLengths = []string{"1h", "24h", "next", "forever"}
+
+// snoozeModes maps the snooze lengths to the modes Czar's mute route takes.
 var snoozeModes = map[string]string{
 	"1h":      "1h",
 	"24h":     "24h",
@@ -37,7 +43,13 @@ A length is a number with s, m, h or d: 90s, 5m, 2h, 1d.`,
 		Example: `  pulseczar monitors create https://example.com
   pulseczar monitors create https://example.com --name "Marketing site" --every 1m
   pulseczar monitors create --heartbeat --name "Nightly backup" --every 1d --grace 1h`,
-		Args: cobra.MaximumNArgs(1),
+		Args: func(_ *cobra.Command, args []string) error {
+			if len(args) > 1 {
+				return usageError("give one address to check, not %d", len(args))
+			}
+
+			return nil
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			body, err := buildCreateBody(args, flags)
 			if err != nil {
@@ -138,9 +150,9 @@ func buildHeartbeatBody(args []string, flags createFlags) (api.MonitorCreate, er
 
 func (a *app) newMonitorsPauseCommand() *cobra.Command {
 	return a.newMonitorIDCommand(
-		"pause <id>",
+		"pause <monitor>",
 		"Pause a monitor: it stops checking and stops alerting",
-		"  pulseczar monitors pause 7K3M9XQ2T4VB",
+		"  pulseczar monitors pause checkout",
 		func(client *api.Client, id string) (api.MonitorDetail, []byte, error) {
 			return client.SetPaused(id, true)
 		},
@@ -149,9 +161,9 @@ func (a *app) newMonitorsPauseCommand() *cobra.Command {
 
 func (a *app) newMonitorsResumeCommand() *cobra.Command {
 	return a.newMonitorIDCommand(
-		"resume <id>",
+		"resume <monitor>",
 		"Resume a paused monitor",
-		"  pulseczar monitors resume 7K3M9XQ2T4VB",
+		"  pulseczar monitors resume checkout",
 		func(client *api.Client, id string) (api.MonitorDetail, []byte, error) {
 			return client.SetPaused(id, false)
 		},
@@ -160,30 +172,31 @@ func (a *app) newMonitorsResumeCommand() *cobra.Command {
 
 func (a *app) newMonitorsUnsnoozeCommand() *cobra.Command {
 	return a.newMonitorIDCommand(
-		"unsnooze <id>",
+		"unsnooze <monitor>",
 		"Turn alerts back on for a snoozed monitor",
-		"  pulseczar monitors unsnooze 7K3M9XQ2T4VB",
+		"  pulseczar monitors unsnooze checkout",
 		func(client *api.Client, id string) (api.MonitorDetail, []byte, error) {
 			return client.SetSnooze(id, "off")
 		},
 	)
 }
 
-// newMonitorIDCommand builds a command that takes one monitor id, makes one write
+// newMonitorIDCommand builds a command that takes one monitor, makes one write
 // and prints the monitor it answers with.
 func (a *app) newMonitorIDCommand(use, short, example string, write monitorCall) *cobra.Command {
 	return &cobra.Command{
-		Use:     use,
-		Short:   short,
-		Example: example,
-		Args:    exactlyOneID("a monitor id", "pulseczar monitors list"),
+		Use:               use,
+		Short:             short,
+		Example:           example,
+		Args:              monitorArgs(0),
+		ValidArgsFunction: a.completeMonitorNames,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, err := a.signedInClient()
+			client, id, err := a.signedInMonitor(args[0])
 			if err != nil {
 				return err
 			}
 
-			monitor, raw, err := write(client, args[0])
+			monitor, raw, err := write(client, id)
 			if err != nil {
 				return fail(err)
 			}
@@ -196,31 +209,36 @@ func (a *app) newMonitorIDCommand(use, short, example string, write monitorCall)
 }
 
 func (a *app) newMonitorsSnoozeCommand() *cobra.Command {
-	var length string
-
-	snooze := &cobra.Command{
-		Use:   "snooze <id> --for 1h|24h|next|forever",
+	return &cobra.Command{
+		Use:   "snooze <monitor> [1h|24h|next|forever]",
 		Short: "Snooze alerts for a monitor; it keeps checking",
 		Long: `Snooze alerts for a monitor. The monitor keeps checking and keeps its history.
 
-  1h, 24h   snooze for that long
+  1h, 24h   snooze for that long (1h when you give no length)
   next      snooze until the next incident ends
   forever   snooze until you run "monitors unsnooze"`,
-		Example: `  pulseczar monitors snooze 7K3M9XQ2T4VB --for 1h
-  pulseczar monitors snooze 7K3M9XQ2T4VB --for next`,
-		Args: exactlyOneID("a monitor id", "pulseczar monitors list"),
+		Example: `  pulseczar monitors snooze checkout
+  pulseczar monitors snooze checkout 24h
+  pulseczar monitors snooze checkout next`,
+		Args:              monitorArgs(1),
+		ValidArgsFunction: a.completeSnooze,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			mode, ok := snoozeModes[length]
-			if !ok {
-				return usageError("--for must be one of 1h, 24h, next, forever; got %q", length)
+			length := defaultSnooze
+			if len(args) > 1 {
+				length = args[1]
 			}
 
-			client, err := a.signedInClient()
+			mode, ok := snoozeModes[length]
+			if !ok {
+				return usageError("the snooze length must be one of 1h, 24h, next, forever; got %q", length)
+			}
+
+			client, id, err := a.signedInMonitor(args[0])
 			if err != nil {
 				return err
 			}
 
-			monitor, raw, err := client.SetSnooze(args[0], mode)
+			monitor, raw, err := client.SetSnooze(id, mode)
 			if err != nil {
 				return fail(err)
 			}
@@ -230,8 +248,4 @@ func (a *app) newMonitorsSnoozeCommand() *cobra.Command {
 			return nil
 		},
 	}
-	snooze.Flags().StringVar(&length, "for", "", "how long: 1h, 24h, next or forever")
-	_ = snooze.MarkFlagRequired("for")
-
-	return snooze
 }

@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/cli/browser"
 	"github.com/pulseczar-com/cli/internal/cli"
 	"github.com/pulseczar-com/cli/internal/config"
 	"golang.org/x/term"
@@ -43,6 +44,7 @@ func main() {
 		Sleep:            time.Sleep,
 		Now:              time.Now,
 		Hostname:         hostname,
+		OpenBrowser:      browser.OpenURL,
 		Version:          version,
 		Width:            width,
 	}))
