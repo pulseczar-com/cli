@@ -35,6 +35,8 @@ type Env struct {
 	Stdout, Stderr io.Writer
 	Getenv         func(string) string
 	ConfigPath     string
+	// CacheDir is where the status line keeps its cache. Empty means no cache.
+	CacheDir string
 	// IsTerminal is true when stdout is a terminal; it picks the styled screen over the compact form.
 	IsTerminal bool
 	// StderrIsTerminal is true when stderr is a terminal; it picks the styled error over the plain one.

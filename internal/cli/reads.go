@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/pulseczar-com/cli/internal/api"
@@ -10,13 +11,40 @@ import (
 var monitorStatuses = []string{"up", "down", "stale", "paused", "new"}
 
 func (a *app) newStatusCommand() *cobra.Command {
-	return &cobra.Command{
-		Use:     "status",
-		Short:   "Show whether your monitors are up, with the counts",
-		Example: "  pulseczar status\n  pulseczar status --json",
+	var line bool
+
+	status := &cobra.Command{
+		Use:   "status",
+		Short: "Show whether your monitors are up, with the counts",
+		Long: `Show whether your monitors are up, with the counts.
+
+With --line, print one line for a status bar and always exit 0. A signed-out or
+offline state is a word on the line. The answer is cached for 30 seconds, so a bar
+that runs the command often makes at most two calls a minute. Color follows NO_COLOR
+and TERM=dumb, not the terminal check, because a bar runs the command in a pipe.`,
+		Example: "  pulseczar status\n  pulseczar status --json\n  pulseczar status --line",
 		Args:    cobra.NoArgs,
-		RunE:    func(cmd *cobra.Command, _ []string) error { return a.showStatus() },
+		RunE: func(cmd *cobra.Command, _ []string) error {
+			if line {
+				return a.runStatusLine()
+			}
+
+			return a.showStatus()
+		},
 	}
+	status.Flags().BoolVar(&line, "line", false, "print one line for a status bar")
+
+	return status
+}
+
+func (a *app) runStatusLine() error {
+	if a.asJSON {
+		return usageError("--line prints text for a status bar, so it cannot be used with --json")
+	}
+
+	fmt.Fprintln(a.env.Stdout, a.statusLine())
+
+	return nil
 }
 
 func (a *app) showStatus() error {

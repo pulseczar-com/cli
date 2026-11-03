@@ -13,6 +13,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/pulseczar-com/cli/internal/config"
 )
 
 var update = flag.Bool("update", false, "rewrite the golden files")
@@ -113,6 +115,7 @@ type result struct {
 	sleeps         []time.Duration
 	opened         []string
 	configPath     string
+	cacheDir       string
 }
 
 // testNow is the clock of every run. It matches the "at" time in the fixtures.
@@ -128,6 +131,10 @@ type options struct {
 	width          int
 	browserFails   bool
 	env            map[string]string
+	now            time.Time
+	cacheDir       string
+	// savedToken is written to the config file before the run.
+	savedToken string
 }
 
 func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
@@ -135,6 +142,22 @@ func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
 
 	var out, errOut bytes.Buffer
 	run := result{configPath: filepath.Join(t.TempDir(), "pulseczar", "config.json")}
+
+	if opts.savedToken != "" {
+		saved := config.File{URL: czar.server.URL, Token: opts.savedToken}
+		if err := config.Save(run.configPath, saved); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	run.cacheDir = opts.cacheDir
+	if run.cacheDir == "" {
+		run.cacheDir = filepath.Join(t.TempDir(), "pulseczar")
+	}
+	now := testNow
+	if !opts.now.IsZero() {
+		now = opts.now
+	}
 
 	env := map[string]string{envURL: czar.server.URL}
 	if !opts.noToken {
@@ -152,11 +175,12 @@ func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
 		Stderr:           &errOut,
 		Getenv:           func(key string) string { return env[key] },
 		ConfigPath:       run.configPath,
+		CacheDir:         run.cacheDir,
 		IsTerminal:       opts.terminal,
 		StderrIsTerminal: opts.stderrTerminal,
 		HTTP:             czar.server.Client(),
 		Sleep:            func(d time.Duration) { run.sleeps = append(run.sleeps, d) },
-		Now:              func() time.Time { return testNow },
+		Now:              func() time.Time { return now },
 		Hostname:         "ada-laptop",
 		OpenBrowser: func(address string) error {
 			if opts.browserFails {

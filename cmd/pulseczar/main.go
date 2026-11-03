@@ -4,6 +4,7 @@ package main
 import (
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/cli/browser"
@@ -23,6 +24,14 @@ func main() {
 		home = "."
 	}
 
+	// Without a cache folder the status line still works; it just calls every time.
+	cacheDir, err := os.UserCacheDir()
+	if err == nil {
+		cacheDir = filepath.Join(cacheDir, "pulseczar")
+	} else {
+		cacheDir = ""
+	}
+
 	hostname, err := os.Hostname()
 	if err != nil || hostname == "" {
 		hostname = "pulseczar-cli"
@@ -38,6 +47,7 @@ func main() {
 		Stderr:           os.Stderr,
 		Getenv:           os.Getenv,
 		ConfigPath:       config.DefaultPath(home),
+		CacheDir:         cacheDir,
 		IsTerminal:       term.IsTerminal(int(os.Stdout.Fd())),
 		StderrIsTerminal: term.IsTerminal(int(os.Stderr.Fd())),
 		HTTP:             &http.Client{Timeout: requestTimeout},

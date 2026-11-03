@@ -1,0 +1,1 @@
+PulseCzar <ESC>[90m○<ESC>[0m All paused

@@ -44,7 +44,7 @@ A token expires after 90 days without use.
 
 | Command | What it does |
 | --- | --- |
-| `status` | Whether your monitors are up, with the counts. |
+| `status` | Whether your monitors are up, with the counts. `status --line` prints one line for a status bar. |
 | `monitors [--status up\|down\|stale\|paused\|new]` | List your monitors (`monitors list` or `monitors ls` do the same). |
 | `monitors show <monitor>` | One monitor, with its recent incidents. |
 | `incidents [--open] [--since 24h] [--monitor <monitor>]` | Incidents, newest first, 25 to a page. On a terminal the last line is the command for the next page (`--cursor`). |
@@ -59,6 +59,34 @@ A token expires after 90 days without use.
 `<monitor>` is a monitor's id, its name, or the start of its name, in any case. Two monitors that match are an error that lists both.
 
 Writes need a **Read and write** sign-in. `pulseczar <command> --help` shows flags and examples.
+
+## Status line
+
+`pulseczar status --line` prints one line for a status bar, such as `PulseCzar ● 1 down · 1 stale`. The text is the status the web header shows. It always exits 0, so a bar shows `PulseCzar ? offline` or `PulseCzar ○ signed out` and not an empty entry. `--line` cannot be used with `--json`.
+
+- The answer is cached for 30 seconds in `os.UserCacheDir()/pulseczar/`, so one computer makes at most two calls a minute however many bars run the command. When the call fails, a cache under an hour old shows with its age (`· 6m ago`).
+- The call has a 2-second timeout. A refused token shows `PulseCzar ○ sign in again`.
+- Color is on unless `NO_COLOR` is set or `TERM=dumb`, even when piped, because a bar runs the command in a pipe.
+- `auth login` and `auth logout` delete the cache.
+
+Claude Code, in `~/.claude/settings.json` (or append the output to an existing status line script):
+
+```json
+{ "statusLine": { "type": "command", "command": "pulseczar status --line", "refreshInterval": 30 } }
+```
+
+herdr, in `~/.config/herdr/config.toml`:
+
+```toml
+[ui]
+tab_bar_right = [ { type = "command", command = "pulseczar status --line", interval_seconds = 30, timeout_seconds = 3 } ]
+```
+
+tmux, in `~/.tmux.conf`:
+
+```tmux
+set -g status-right '#(NO_COLOR=1 pulseczar status --line)'
+```
 
 ## Output
 

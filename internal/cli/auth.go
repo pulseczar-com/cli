@@ -94,6 +94,8 @@ func (a *app) runLogin(cmd *cobra.Command, _ []string) error {
 		return fail(err)
 	}
 
+	a.clearStatusCaches()
+
 	client.Token = token
 	me, raw, err := client.GetMe()
 	if err != nil {
@@ -199,6 +201,8 @@ func (a *app) runLogout(cmd *cobra.Command, _ []string) error {
 	if err := config.Remove(a.env.ConfigPath); err != nil {
 		return fail(err)
 	}
+
+	a.clearStatusCaches()
 
 	if isRejectedToken(revokeErr) {
 		revokeErr = nil // The server no longer accepts the token, so there is nothing to revoke.
