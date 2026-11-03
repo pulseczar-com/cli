@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"net/http"
 	"strings"
 	"testing"
 )
@@ -54,17 +55,114 @@ func TestHomeScreenListsTenMonitorsAndCountsTheRest(t *testing.T) {
 	}
 }
 
-func TestHomeScreenSignedOutIsAWelcomeWithExitZero(t *testing.T) {
+func TestHomeScreenSignedOutShowsTheLogoThenTheSignInPromptAndExitsFour(t *testing.T) {
 	czar := newFakeCzar(t, nil)
 
-	run := runCLI(t, czar, options{terminal: true, noToken: true, width: 80})
+	run := runCLI(t, czar, options{terminal: true, stderrTerminal: true, noToken: true, width: 80})
 
-	assertGolden(t, "home.signed_out", run.stdout)
-	if run.code != 0 {
-		t.Errorf("exit code %d, want 0", run.code)
+	assertGolden(t, "home.signed_out.stdout", run.stdout)
+	assertGolden(t, "home.signed_out.stderr", run.stderr)
+	if run.code != exitAuth {
+		t.Errorf("exit = %d, want %d", run.code, exitAuth)
 	}
 	if len(czar.requests) != 0 {
-		t.Errorf("the welcome screen made requests: %+v", czar.requests)
+		t.Errorf("the signed-out screen made requests: %+v", czar.requests)
+	}
+}
+
+func TestHomeScreenPaintsTheBrandGreenByTerminalColorSupport(t *testing.T) {
+	cases := []struct {
+		name string
+		env  map[string]string
+		want string
+	}{
+		{"truecolor", map[string]string{"COLORTERM": "truecolor"}, "\x1b[38;2;61;220;132m"},
+		{"24bit", map[string]string{"COLORTERM": "24bit"}, "\x1b[38;2;61;220;132m"},
+		{"256 colors", map[string]string{"TERM": "xterm-256color"}, "\x1b[38;5;78m"},
+		{"basic", map[string]string{"TERM": "xterm"}, "\x1b[32m"},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			run := runCLI(t, newFakeCzar(t, nil), options{terminal: true, noToken: true, color: true, width: 80, env: tc.env})
+
+			if !strings.Contains(run.stdout, tc.want) {
+				t.Errorf("no %q in %q", tc.want, run.stdout)
+			}
+		})
+	}
+}
+
+func TestNoColorStillTurnsOffTheBrandColors(t *testing.T) {
+	run := runCLI(t, newFakeCzar(t, nil), options{terminal: true, noToken: true, width: 80, env: map[string]string{"COLORTERM": "truecolor"}})
+
+	if strings.Contains(run.stdout, escape) {
+		t.Errorf("color codes with NO_COLOR set: %q", run.stdout)
+	}
+}
+
+func TestHomeScreenWithARejectedSavedTokenMatchesTheSignedOutScreen(t *testing.T) {
+	czar := newFakeCzar(t, map[string][]reply{
+		"GET /api/v1/me":    {{http.StatusUnauthorized, "unauthenticated"}},
+		"GET /api/v1/board": {{http.StatusUnauthorized, "unauthenticated"}},
+	})
+
+	run := runCLI(t, czar, options{terminal: true, stderrTerminal: true, noToken: true, savedToken: "1|saved", width: 80})
+
+	assertGolden(t, "home.signed_out.stdout", run.stdout)
+	assertGolden(t, "home.signed_out.stderr", run.stderr)
+	if run.code != exitAuth {
+		t.Errorf("exit = %d, want %d", run.code, exitAuth)
+	}
+}
+
+func TestHomeScreenWithARejectedEnvTokenSaysSo(t *testing.T) {
+	czar := newFakeCzar(t, map[string][]reply{
+		"GET /api/v1/me":    {{http.StatusUnauthorized, "unauthenticated"}},
+		"GET /api/v1/board": {{http.StatusUnauthorized, "unauthenticated"}},
+	})
+
+	run := runCLI(t, czar, options{terminal: true, stderrTerminal: true, width: 80})
+
+	assertGolden(t, "home.signed_out.stdout", run.stdout)
+	assertGolden(t, "home.rejected_env_token.stderr", run.stderr)
+	if run.code != exitAuth {
+		t.Errorf("exit = %d, want %d", run.code, exitAuth)
+	}
+}
+
+func TestEveryCommandThatFailsSignedOutShowsTheSamePrompt(t *testing.T) {
+	rejected := map[string][]reply{"GET /api/v1/board": {{http.StatusUnauthorized, "unauthenticated"}}}
+	cases := []struct {
+		name string
+		czar *fakeCzar
+		opts options
+	}{
+		{"no token", newFakeCzar(t, nil), options{noToken: true, stderrTerminal: true}},
+		{"rejected saved token", newFakeCzar(t, rejected), options{stderrTerminal: true, noToken: true, savedToken: "1|saved"}},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			run := runCLI(t, tc.czar, tc.opts, "monitors", "list")
+
+			if want := "✗ You are not signed in.\n  Run `pulseczar auth login` to sign in.\n"; run.stderr != want {
+				t.Errorf("stderr %q, want %q", run.stderr, want)
+			}
+			if strings.Contains(run.stdout, "░") {
+				t.Errorf("a logo on a command that is not the bare command:\n%s", run.stdout)
+			}
+		})
+	}
+}
+
+func TestACommandWithARejectedEnvTokenSaysSo(t *testing.T) {
+	czar := newFakeCzar(t, map[string][]reply{"GET /api/v1/board": {{http.StatusUnauthorized, "unauthenticated"}}})
+
+	run := runCLI(t, czar, options{stderrTerminal: true}, "monitors", "list")
+
+	if want := "✗ PULSECZAR_TOKEN was rejected.\n  Unset it or replace it.\n"; run.stderr != want {
+		t.Errorf("stderr %q, want %q", run.stderr, want)
 	}
 }
 

@@ -205,7 +205,7 @@ func TestStatusDotIsNeverGreenWithoutMonitors(t *testing.T) {
 }
 
 func TestATimestampTheCLIcannotReadShowsAsSent(t *testing.T) {
-	screen := terminal{style: render.NewStyle(false), now: testNow}
+	screen := terminal{style: render.NewStyle(false, render.Basic), now: testNow}
 
 	if got := screen.ago("last Tuesday"); got != "last Tuesday" {
 		t.Errorf("got %q", got)

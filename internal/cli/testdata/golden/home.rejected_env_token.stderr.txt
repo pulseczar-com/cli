@@ -1,0 +1,2 @@
+✗ PULSECZAR_TOKEN was rejected.
+  Unset it or replace it.

@@ -1,0 +1,2 @@
+✗ You are not signed in.
+  Run `pulseczar auth login` to sign in.

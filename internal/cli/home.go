@@ -12,18 +12,22 @@ import (
 )
 
 // minLogoWidth is the narrowest terminal that shows the logo.
-const minLogoWidth = 50
+const minLogoWidth = 56
 
 // maxHomeMonitors is how many monitors the home screen lists.
 const maxHomeMonitors = 10
 
-// The logo: four bars, then the name. The name is split where Pulse ends and Czar starts.
+// tagline is the product's line from the pulseczar.com home page.
+const tagline = "Uptime monitoring you can trust."
+
+// The logo: four bars, then the name in half-block letters. The name is split where Pulse ends and Czar starts.
 const logoBars = "░ ▒ ▓ █"
 
-var logoRows = [3][2]string{
-	{"╔═╗┬ ┬┬  ┌─┐┌─┐", "╔═╗┌─┐┌─┐┬─┐"},
-	{"╠═╝│ ││  └─┐├┤ ", "║  ┌─┘├─┤├┬┘"},
-	{"╩  └─┘┴─┘└─┘└─┘", "╚═╝└─┘┴ ┴┴└─"},
+var logoRows = [4][2]string{
+	{"█▀▀▀▄ █   █ █     ▄▀▀▀▀ █▀▀▀▀", "▄▀▀▀▀ ▀▀▀▀█ ▄▀▀▀▄ █▀▀▀▄"},
+	{"█▄▄▄▀ █   █ █     ▀▄▄▄  █▄▄▄ ", "█       ▄▀  █▄▄▄█ █▄▄▄▀"},
+	{"█     █   █ █         █ █    ", "█     ▄▀    █   █ █ ▀▄ "},
+	{"▀      ▀▀▀  ▀▀▀▀▀ ▀▀▀▀  ▀▀▀▀▀", " ▀▀▀▀ ▀▀▀▀▀ ▀   ▀ ▀   ▀"},
 }
 
 // runHome is the bare `pulseczar`. Piped or with --json it is `pulseczar status`.
@@ -38,9 +42,7 @@ func (a *app) runHome() error {
 	}
 
 	if found.Token == "" {
-		io.WriteString(a.env.Stdout, a.stdoutTerminal().welcomeScreen(a.logo()))
-
-		return nil
+		return a.signedOutHome(notSignedIn())
 	}
 
 	client, err := a.clientFor(found)
@@ -50,12 +52,23 @@ func (a *app) runHome() error {
 
 	me, board, err := fetchHome(client)
 	if err != nil {
+		if isRejectedToken(err) {
+			return a.signedOutHome(err)
+		}
+
 		return fail(err)
 	}
 
 	io.WriteString(a.env.Stdout, a.stdoutTerminal().homeScreen(a.logo(), me, board))
 
 	return nil
+}
+
+// signedOutHome opens with the logo and the tagline, then fails with the sign-in message.
+func (a *app) signedOutHome(err error) error {
+	io.WriteString(a.env.Stdout, taglineScreen(a.logo()))
+
+	return fail(err)
 }
 
 // fetchHome asks for the account and the board at the same time.
@@ -93,12 +106,10 @@ func (a *app) logo() string {
 func (t terminal) logo(version string) string {
 	var out strings.Builder
 
-	for i, row := range logoRows {
-		fmt.Fprintf(&out, " %s  %s%s", t.style.Paint(render.Green, logoBars), row[0], t.style.Paint(render.Green, row[1]))
-		if i == len(logoRows)-1 {
-			fmt.Fprintf(&out, "  %s", t.gray(versionLabel(version)))
-		}
-		out.WriteString("\n")
+	fmt.Fprintf(&out, " %s  %s\n", t.style.Paint(render.Green, logoBars), t.gray(versionLabel(version)))
+
+	for _, row := range logoRows {
+		fmt.Fprintf(&out, " %s %s\n", row[0], t.style.Paint(render.Green, row[1]))
 	}
 
 	return out.String()
@@ -113,20 +124,15 @@ func versionLabel(version string) string {
 	return version
 }
 
-func (t terminal) welcomeScreen(logo string) string {
+// taglineScreen is the logo and the tagline, which open the signed-out bare command.
+func taglineScreen(logo string) string {
 	var out strings.Builder
 
 	if logo != "" {
 		out.WriteString(logo + "\n")
 	}
 
-	out.WriteString(" Uptime monitoring for your sites and jobs, in your terminal.\n\n")
-	out.WriteString(" You are not signed in.\n\n")
-	out.WriteString(t.nextLines([]nextStep{
-		{"pulseczar auth login", "sign in with your browser"},
-		{"pulseczar --help", "all commands"},
-	}))
-	fmt.Fprintf(&out, "\n In CI, set PULSECZAR_TOKEN.  Guide: %s\n", guideURL)
+	out.WriteString(" " + tagline + "\n\n")
 
 	return out.String()
 }

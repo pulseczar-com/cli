@@ -159,7 +159,21 @@ func (a *app) stdoutTerminal() terminal {
 func (a *app) styleFor(isTerminal bool) render.Style {
 	colorAllowed := a.env.Getenv("NO_COLOR") == "" && a.env.Getenv("TERM") != "dumb"
 
-	return render.NewStyle(isTerminal && colorAllowed)
+	return render.NewStyle(isTerminal && colorAllowed, a.colorDepth())
+}
+
+// colorDepth reads the terminal's color support: COLORTERM for 24-bit, then TERM for 256 colors.
+func (a *app) colorDepth() render.Depth {
+	switch a.env.Getenv("COLORTERM") {
+	case "truecolor", "24bit":
+		return render.TrueColor
+	}
+
+	if strings.Contains(a.env.Getenv("TERM"), "256color") {
+		return render.Ansi256
+	}
+
+	return render.Basic
 }
 
 // settings is the server and token a command uses, with where the token came from.

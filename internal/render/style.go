@@ -5,8 +5,9 @@ import (
 	"unicode/utf8"
 )
 
-// Color is one of the 16 standard terminal colors. The person's theme picks
-// the exact shade, so the output reads on a light or a dark background.
+// Color is a named color. Gray and Yellow are standard terminal colors, so the
+// person's theme picks the shade. Green and Red are the brand colors, which a
+// terminal with more colors shows exactly.
 type Color int
 
 // The colors a screen uses.
@@ -24,21 +25,39 @@ const (
 	MarkFailed = "✗"
 )
 
-var colorCodes = map[Color]string{
-	Green:  "32",
-	Red:    "31",
-	Yellow: "33",
-	Gray:   "90",
+// Depth is how many colors a terminal shows.
+type Depth int
+
+// The depths, from fewest colors to most.
+const (
+	Basic Depth = iota
+	Ansi256
+	TrueColor
+)
+
+// codes is the escape parameter for a color at each depth.
+type codes struct {
+	basic, ansi256, trueColor string
+}
+
+// The brand colors are #3DDC84 and #E5484D from the website's dark theme. Truecolor shows them exactly;
+// 256-color uses the nearest palette entries, 78 (#5fd787) and 167 (#d75f5f).
+var colorCodes = map[Color]codes{
+	Green:  {"32", "38;5;78", "38;2;61;220;132"},
+	Red:    {"31", "38;5;167", "38;2;229;72;77"},
+	Yellow: {"33", "33", "33"},
+	Gray:   {"90", "90", "90"},
 }
 
 // Style paints text. A Style that is off returns the text unchanged.
 type Style struct {
-	on bool
+	on    bool
+	depth Depth
 }
 
-// NewStyle returns a Style that paints only when on is true.
-func NewStyle(on bool) Style {
-	return Style{on: on}
+// NewStyle returns a Style that paints at the given depth only when on is true.
+func NewStyle(on bool, depth Depth) Style {
+	return Style{on: on, depth: depth}
 }
 
 // Paint wraps text in the color's escape codes.
@@ -48,7 +67,15 @@ func (s Style) Paint(color Color, text string) string {
 		return text
 	}
 
-	return "\x1b[" + code + "m" + text + "\x1b[0m"
+	parameter := code.basic
+	switch s.depth {
+	case Ansi256:
+		parameter = code.ansi256
+	case TrueColor:
+		parameter = code.trueColor
+	}
+
+	return "\x1b[" + parameter + "m" + text + "\x1b[0m"
 }
 
 // Cell is one value in a column.

@@ -1,2 +1,2 @@
-✗ not signed in
-  run `pulseczar auth login`, or set PULSECZAR_TOKEN
+✗ You are not signed in.
+  Run `pulseczar auth login` to sign in.

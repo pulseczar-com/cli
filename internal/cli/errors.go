@@ -52,13 +52,27 @@ func usageError(format string, args ...any) error {
 	return &commandError{exit: exitUsage, code: codeUsage, message: fmt.Sprintf(format, args...)}
 }
 
+// signedOutText is what a person sees on a terminal whenever a command fails because they are signed out.
+var signedOutText = &terminalText{
+	message: "You are not signed in.",
+	hint:    "Run `pulseczar auth login` to sign in.",
+}
+
 func notSignedIn() error {
 	return &commandError{
-		exit:    exitAuth,
-		code:    codeNotSignedIn,
-		message: "not signed in",
-		details: []string{"hint: run `pulseczar auth login`, or set PULSECZAR_TOKEN"},
+		exit:       exitAuth,
+		code:       codeNotSignedIn,
+		message:    "not signed in",
+		details:    []string{"hint: run `pulseczar auth login`, or set PULSECZAR_TOKEN"},
+		onTerminal: signedOutText,
 	}
+}
+
+// envTokenRejectedText is what a person sees when the server rejects the token in PULSECZAR_TOKEN.
+// A new `auth login` cannot help, because the variable wins over the saved token.
+var envTokenRejectedText = &terminalText{
+	message: envToken + " was rejected.",
+	hint:    "Unset it or replace it.",
 }
 
 // fail turns any error a command met into a commandError.
@@ -110,6 +124,7 @@ func fromAPI(err *api.Error) *commandError {
 	case api.CodeUnauthenticated:
 		failure.exit = exitAuth
 		failure.details = []string{"hint: run `pulseczar auth login`"}
+		failure.onTerminal = signedOutText
 	case api.CodeForbidden:
 		failure.exit = exitAuth
 		failure.details = []string{"hint: this sign-in is read only; run `pulseczar auth login` and choose Read and write"}
@@ -173,17 +188,27 @@ func (a *app) printPlainError(failure *commandError) {
 	}
 }
 
+// terminalWording is the message and details a person sees for a failure.
+func (a *app) terminalWording(failure *commandError) (string, []string) {
+	text := failure.onTerminal
+	if failure.code == api.CodeUnauthenticated && a.env.Getenv(envToken) != "" {
+		text = envTokenRejectedText
+	}
+	if text == nil {
+		return failure.message, failure.details
+	}
+	if text.hint == "" {
+		return text.message, nil
+	}
+
+	return text.message, []string{text.hint}
+}
+
 // printStyledError is for a person: a red mark and the message, then each detail
 // indented under it, with the "hint:" label dropped.
 func (a *app) printStyledError(failure *commandError) {
 	style := a.styleFor(true)
-	message, details := failure.message, failure.details
-	if failure.onTerminal != nil {
-		message, details = failure.onTerminal.message, nil
-		if failure.onTerminal.hint != "" {
-			details = []string{failure.onTerminal.hint}
-		}
-	}
+	message, details := a.terminalWording(failure)
 
 	fmt.Fprintf(a.env.Stderr, "%s %s\n", style.Paint(render.Red, render.MarkFailed), message)
 	for _, line := range details {
