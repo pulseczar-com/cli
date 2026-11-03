@@ -179,7 +179,10 @@ func (a *app) printStyledError(failure *commandError) {
 	style := a.styleFor(true)
 	message, details := failure.message, failure.details
 	if failure.onTerminal != nil {
-		message, details = failure.onTerminal.message, []string{failure.onTerminal.hint}
+		message, details = failure.onTerminal.message, nil
+		if failure.onTerminal.hint != "" {
+			details = []string{failure.onTerminal.hint}
+		}
 	}
 
 	fmt.Fprintf(a.env.Stderr, "%s %s\n", style.Paint(render.Red, render.MarkFailed), message)

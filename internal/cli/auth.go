@@ -3,19 +3,11 @@ package cli
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/pulseczar-com/cli/internal/api"
 	"github.com/pulseczar-com/cli/internal/config"
 	"github.com/pulseczar-com/cli/internal/render"
 	"github.com/spf13/cobra"
-)
-
-const (
-	defaultPollInterval = 5 * time.Second
-	defaultSignInWindow = 10 * time.Minute
-	// The RFC 8628 step a client adds to its interval after a slow_down answer.
-	slowDownStep = 5 * time.Second
 )
 
 func (a *app) newAuthCommand() *cobra.Command {
@@ -30,9 +22,10 @@ func (a *app) newAuthCommand() *cobra.Command {
 			Short: "Sign in by approving a code in your browser",
 			Long: `Sign in by approving a code in your browser.
 
-The command prints an address and a code. Open the address, sign in to
-PulseCzar if asked, type the code, choose Read only or Read and write, and
-approve. The command waits, then saves the token to ~/.config/pulseczar/config.json.`,
+The command shows a code, then opens PulseCzar in your browser when you press
+Enter. Sign in if asked, type the code, choose Read only or Read and write, and
+approve. Over SSH, or when input is not a terminal, the command prints the
+address and the code and opens nothing. The command waits, then saves the token to ~/.config/pulseczar/config.json.`,
 			Example: `  pulseczar auth login`,
 			Args:    cobra.NoArgs,
 			RunE:    a.runLogin,
@@ -68,92 +61,6 @@ token is saved.`,
 	)
 
 	return auth
-}
-
-func (a *app) runLogin(cmd *cobra.Command, _ []string) error {
-	found, err := a.loadSettings()
-	if err != nil {
-		return fail(err)
-	}
-
-	client := &api.Client{BaseURL: found.URL, HTTP: a.env.HTTP}
-
-	start, err := client.StartSignIn(a.env.Hostname)
-	if err != nil {
-		return fail(err)
-	}
-
-	fmt.Fprintf(a.env.Stderr, "Open: %s\nCode: %s\n\nWaiting for you to approve the code...\n", start.VerificationURI, start.UserCode)
-
-	token, err := a.awaitApproval(client, start)
-	if err != nil {
-		return fail(err)
-	}
-
-	if err := config.Save(a.env.ConfigPath, config.File{URL: found.URL, Token: token}); err != nil {
-		return fail(err)
-	}
-
-	a.clearStatusCaches()
-
-	client.Token = token
-	me, raw, err := client.GetMe()
-	if err != nil {
-		return fail(err)
-	}
-
-	a.print(raw, meView(me, found.URL, "config file"), func(t terminal) string {
-		return t.meScreen(me, found.URL, "config file")
-	})
-
-	return nil
-}
-
-// awaitApproval polls until the person approves or denies, or the code expires.
-func (a *app) awaitApproval(client *api.Client, start api.SignInStart) (string, error) {
-	interval := time.Duration(start.Interval) * time.Second
-	if interval <= 0 {
-		interval = defaultPollInterval
-	}
-
-	window := time.Duration(start.ExpiresIn) * time.Second
-	if window <= 0 {
-		window = defaultSignInWindow
-	}
-
-	for waited := time.Duration(0); waited < window; waited += interval {
-		a.env.Sleep(interval)
-
-		result, err := client.PollSignIn(start.DeviceCode)
-		if err != nil {
-			return "", err
-		}
-
-		switch result.Error {
-		case "":
-			return result.Token, nil
-		case api.PollPending:
-		case api.PollSlowDown:
-			interval += slowDownStep
-		case api.PollDenied:
-			return "", &commandError{exit: exitAuth, code: codeAccessDenied, message: "the sign-in was denied"}
-		case api.PollExpired:
-			return "", expiredSignIn()
-		default:
-			return "", &commandError{exit: exitError, code: codeUnexpectedAnswer, message: "unexpected sign-in answer: " + result.Error}
-		}
-	}
-
-	return "", expiredSignIn()
-}
-
-func expiredSignIn() error {
-	return &commandError{
-		exit:    exitAuth,
-		code:    codeExpiredToken,
-		message: "the code expired before it was approved",
-		details: []string{"hint: run `pulseczar auth login` again"},
-	}
 }
 
 func (a *app) runAuthStatus(cmd *cobra.Command, _ []string) error {

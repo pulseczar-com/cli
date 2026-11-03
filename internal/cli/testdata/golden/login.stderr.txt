@@ -1,4 +1,6 @@
-Open: https://pulseczar.com/cli
-Code: BCDF-GHJK
+Open this address in a browser on any device:
+  https://pulseczar.com/cli/approve
+
+Then type this code:  BCDF-GHJK
 
 Waiting for you to approve the code...

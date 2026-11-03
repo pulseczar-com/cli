@@ -1,0 +1,5 @@
+! First copy your code: BCDF-GHJK. Press Enter to open pulseczar.com in your browser.
+Could not open the browser. Go to this address:
+  https://pulseczar.com/cli/approve
+
+Waiting for you to approve the code...

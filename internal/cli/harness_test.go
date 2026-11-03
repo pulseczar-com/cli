@@ -130,9 +130,11 @@ type options struct {
 	noToken        bool
 	width          int
 	browserFails   bool
-	env            map[string]string
-	now            time.Time
-	cacheDir       string
+	// stdinTerminal makes stdin a terminal that has Enter waiting.
+	stdinTerminal bool
+	env           map[string]string
+	now           time.Time
+	cacheDir      string
 	// savedToken is written to the config file before the run.
 	savedToken string
 }
@@ -159,7 +161,8 @@ func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
 		now = opts.now
 	}
 
-	env := map[string]string{envURL: czar.server.URL}
+	// The config file sits at <home>/pulseczar/config.json, so screens show ~/pulseczar/config.json.
+	env := map[string]string{envURL: czar.server.URL, "HOME": filepath.Dir(filepath.Dir(run.configPath))}
 	if !opts.noToken {
 		env[envToken] = testToken
 	}
@@ -171,6 +174,7 @@ func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
 	}
 
 	run.code = Run(args, Env{
+		Stdin:            strings.NewReader("\n"),
 		Stdout:           &out,
 		Stderr:           &errOut,
 		Getenv:           func(key string) string { return env[key] },
@@ -178,6 +182,7 @@ func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
 		CacheDir:         run.cacheDir,
 		IsTerminal:       opts.terminal,
 		StderrIsTerminal: opts.stderrTerminal,
+		StdinIsTerminal:  opts.stdinTerminal,
 		HTTP:             czar.server.Client(),
 		Sleep:            func(d time.Duration) { run.sleeps = append(run.sleeps, d) },
 		Now:              func() time.Time { return now },

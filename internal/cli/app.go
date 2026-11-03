@@ -32,6 +32,7 @@ const rootExamples = `  pulseczar                                         see yo
 
 // Env is everything the commands take from the outside, so tests can supply it.
 type Env struct {
+	Stdin          io.Reader
 	Stdout, Stderr io.Writer
 	Getenv         func(string) string
 	ConfigPath     string
@@ -41,8 +42,10 @@ type Env struct {
 	IsTerminal bool
 	// StderrIsTerminal is true when stderr is a terminal; it picks the styled error over the plain one.
 	StderrIsTerminal bool
-	HTTP             *http.Client
-	Sleep            func(time.Duration)
+	// StdinIsTerminal is true when stdin is a terminal, so a person can press Enter.
+	StdinIsTerminal bool
+	HTTP            *http.Client
+	Sleep           func(time.Duration)
 	// Now is the clock for relative times; its zone is the zone times are shown in.
 	Now      func() time.Time
 	Hostname string

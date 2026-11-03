@@ -171,6 +171,12 @@ func (t terminal) meScreen(me api.Me, serverURL, tokenSource string) string {
 	})
 }
 
+// signedInScreen is what a person sees when auth login finishes.
+func (t terminal) signedInScreen(me api.Me, configPath string) string {
+	return fmt.Sprintf("%s Signed in as %s (%s, %d of %d monitors)\n  Token saved to %s\n\nRun pulseczar to see your monitors.\n",
+		t.style.Paint(render.Green, render.MarkDone), me.Email, me.PlanWord, me.MonitorCount, me.MonitorLimit, configPath)
+}
+
 func (t terminal) monitorListScreen(monitors []api.MonitorSummary) string {
 	if len(monitors) == 0 {
 		return "No monitors.\n"

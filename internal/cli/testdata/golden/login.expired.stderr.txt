@@ -1,0 +1,5 @@
+! First copy your code: BCDF-GHJK. Press Enter to open pulseczar.com in your browser.
+If the browser did not open, go to:
+  https://pulseczar.com/cli/approve
+
+[K⠋ Waiting for you to approve · code expires in 10:00 · Ctrl-C to stop[K⠙ Waiting for you to approve · code expires in 9:55 · Ctrl-C to stop[K✗ The code expired. Run pulseczar auth login again.

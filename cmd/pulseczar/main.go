@@ -43,6 +43,7 @@ func main() {
 	}
 
 	os.Exit(cli.Run(os.Args[1:], cli.Env{
+		Stdin:            os.Stdin,
 		Stdout:           os.Stdout,
 		Stderr:           os.Stderr,
 		Getenv:           os.Getenv,
@@ -50,6 +51,7 @@ func main() {
 		CacheDir:         cacheDir,
 		IsTerminal:       term.IsTerminal(int(os.Stdout.Fd())),
 		StderrIsTerminal: term.IsTerminal(int(os.Stderr.Fd())),
+		StdinIsTerminal:  term.IsTerminal(int(os.Stdin.Fd())),
 		HTTP:             &http.Client{Timeout: requestTimeout},
 		Sleep:            time.Sleep,
 		Now:              time.Now,
