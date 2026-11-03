@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var monitorStatuses = []string{"up", "down", "stale", "paused"}
+var monitorStatuses = []string{"up", "down", "stale", "paused", "new"}
 
 func (a *app) newStatusCommand() *cobra.Command {
 	return &cobra.Command{
@@ -26,7 +26,7 @@ func (a *app) newStatusCommand() *cobra.Command {
 				return fail(err)
 			}
 
-			a.print(statusView(status), raw)
+			a.print(raw, statusView(status), func(t terminal) string { return t.statusScreen(status) })
 
 			return nil
 		},
@@ -64,7 +64,7 @@ func (a *app) newMonitorsListCommand() *cobra.Command {
 		Args: cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			if status != "" && !slices.Contains(monitorStatuses, status) {
-				return usageError("--status must be one of up, down, stale, paused; got %q", status)
+				return usageError("--status must be one of up, down, stale, paused, new; got %q", status)
 			}
 
 			client, err := a.signedInClient()
@@ -77,12 +77,13 @@ func (a *app) newMonitorsListCommand() *cobra.Command {
 				return fail(err)
 			}
 
-			a.print(monitorListView(withStatus(board.Monitors, status)), raw)
+			monitors := withStatus(board.Monitors, status)
+			a.print(raw, monitorListView(monitors), func(t terminal) string { return t.monitorListScreen(monitors) })
 
 			return nil
 		},
 	}
-	list.Flags().StringVar(&status, "status", "", "only monitors that are up, down, stale or paused")
+	list.Flags().StringVar(&status, "status", "", "only monitors that are up, down, stale, paused or new")
 
 	return list
 }
@@ -95,7 +96,7 @@ func withStatus(monitors []api.MonitorSummary, status string) []api.MonitorSumma
 
 	var kept []api.MonitorSummary
 	for _, monitor := range monitors {
-		if monitor.Status == status {
+		if statusKey(monitor.Word) == status {
 			kept = append(kept, monitor)
 		}
 	}
@@ -108,7 +109,7 @@ func (a *app) newMonitorsShowCommand() *cobra.Command {
 		Use:     "show <id>",
 		Short:   "Show one monitor",
 		Example: "  pulseczar monitors show 7K3M9XQ2T4VB\n  pulseczar monitors show 7K3M9XQ2T4VB --json",
-		Args:    cobra.ExactArgs(1),
+		Args:    exactlyOneID("a monitor id", "pulseczar monitors list"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := a.signedInClient()
 			if err != nil {
@@ -120,7 +121,7 @@ func (a *app) newMonitorsShowCommand() *cobra.Command {
 				return fail(err)
 			}
 
-			a.print(monitorView(monitor), raw)
+			a.print(raw, monitorView(monitor), func(t terminal) string { return t.monitorScreen(monitor, client.BaseURL) })
 
 			return nil
 		},
@@ -160,7 +161,7 @@ func (a *app) newIncidentsListCommand() *cobra.Command {
 				return fail(err)
 			}
 
-			a.print(incidentListView(incidents), raw)
+			a.print(raw, incidentListView(incidents), func(t terminal) string { return t.incidentListScreen(incidents) })
 
 			return nil
 		},
@@ -178,7 +179,7 @@ func (a *app) newIncidentsShowCommand() *cobra.Command {
 		Use:     "show <id>",
 		Short:   "Show one incident",
 		Example: "  pulseczar incidents show 4T9WQ8ZN2HJ5\n  pulseczar incidents show 4T9WQ8ZN2HJ5 --json",
-		Args:    cobra.ExactArgs(1),
+		Args:    exactlyOneID("an incident id", "pulseczar incidents list"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := a.signedInClient()
 			if err != nil {
@@ -190,7 +191,7 @@ func (a *app) newIncidentsShowCommand() *cobra.Command {
 				return fail(err)
 			}
 
-			a.print(incidentView(incident), raw)
+			a.print(raw, incidentView(incident), func(t terminal) string { return t.incidentScreen(incident) })
 
 			return nil
 		},

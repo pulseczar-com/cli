@@ -3,8 +3,12 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/pulseczar-com/cli/internal/api"
+	"github.com/pulseczar-com/cli/internal/render"
+	"github.com/spf13/cobra"
 )
 
 // Exit codes.
@@ -31,6 +35,15 @@ type commandError struct {
 	message string
 	// details are extra lines printed after `code:`, such as a 422's field messages.
 	details []string
+	// onTerminal replaces message and details when stderr is a terminal. The piped
+	// form keeps the raw message, which scripts may match.
+	onTerminal *terminalText
+}
+
+// terminalText is the plain wording of an error for a person.
+type terminalText struct {
+	message string
+	hint    string
 }
 
 func (e *commandError) Error() string { return e.message }
@@ -62,10 +75,32 @@ func fail(err error) *commandError {
 
 	var network *api.NetworkError
 	if errors.As(err, &network) {
-		return &commandError{exit: exitError, code: api.CodeNetwork, message: network.Error()}
+		return &commandError{
+			exit:       exitError,
+			code:       api.CodeNetwork,
+			message:    network.Error(),
+			onTerminal: unreachable(network),
+		}
 	}
 
 	return &commandError{exit: exitError, code: codeLocalFailure, message: err.Error()}
+}
+
+// unreachable words a network failure for a person: which server, and what to check.
+func unreachable(network *api.NetworkError) *terminalText {
+	server := "the server"
+
+	var request *url.Error
+	if errors.As(network.Err, &request) {
+		if parsed, err := url.Parse(request.URL); err == nil && parsed.Hostname() != "" {
+			server = parsed.Hostname()
+		}
+	}
+
+	return &terminalText{
+		message: "cannot reach " + server,
+		hint:    "check your connection, or the address in " + envURL,
+	}
 }
 
 func fromAPI(err *api.Error) *commandError {
@@ -103,18 +138,67 @@ func invalidDetails(err *api.Error) []string {
 func (a *app) reportError(err error) int {
 	var failure *commandError
 	if !errors.As(err, &failure) {
-		failure = &commandError{
-			exit:    exitUsage,
-			code:    codeUsage,
-			message: err.Error(),
-			details: []string{"hint: run `pulseczar --help`"},
-		}
+		failure = parserError(err)
 	}
 
+	if a.env.StderrIsTerminal {
+		a.printStyledError(failure)
+	} else {
+		a.printPlainError(failure)
+	}
+
+	return failure.exit
+}
+
+const suggestionIntro = "\n\nDid you mean this?\n"
+
+// parserError turns a failure of cobra's parser into a usage error. Cobra's "Did you
+// mean" list moves to the hint line, so the message stays on one line.
+func parserError(err error) *commandError {
+	message, suggestions, found := strings.Cut(err.Error(), suggestionIntro)
+
+	hint := "hint: run `pulseczar --help`"
+	if found {
+		hint = "hint: did you mean `" + strings.Join(strings.Fields(suggestions), "` or `") + "`?"
+	}
+
+	return &commandError{exit: exitUsage, code: codeUsage, message: message, details: []string{hint}}
+}
+
+// printPlainError keeps the `error:` and `code:` lines that scripts read.
+func (a *app) printPlainError(failure *commandError) {
 	fmt.Fprintf(a.env.Stderr, "error: %s\ncode: %s\n", failure.message, failure.code)
 	for _, line := range failure.details {
 		fmt.Fprintln(a.env.Stderr, line)
 	}
+}
 
-	return failure.exit
+// printStyledError is for a person: a red mark and the message, then each detail
+// indented under it, with the "hint:" label dropped.
+func (a *app) printStyledError(failure *commandError) {
+	style := a.styleFor(true)
+	message, details := failure.message, failure.details
+	if failure.onTerminal != nil {
+		message, details = failure.onTerminal.message, []string{failure.onTerminal.hint}
+	}
+
+	fmt.Fprintf(a.env.Stderr, "%s %s\n", style.Paint(render.Red, render.MarkFailed), message)
+	for _, line := range details {
+		fmt.Fprintf(a.env.Stderr, "  %s\n", strings.TrimPrefix(line, "hint: "))
+	}
+}
+
+// exactlyOneID checks the argument count with plain words, in place of cobra's
+// "accepts 1 arg(s), received 0".
+func exactlyOneID(what, listCommand string) cobra.PositionalArgs {
+	return func(_ *cobra.Command, args []string) error {
+		switch {
+		case len(args) == 0:
+			return usageError("give %s; run `%s` to see them", what, listCommand)
+		case len(args) > 1:
+			return usageError("give only one id, not %d", len(args))
+		default:
+			return nil
+		}
+	}
 }

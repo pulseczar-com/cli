@@ -20,16 +20,25 @@ const (
 	envURL   = "PULSECZAR_URL"
 )
 
+// guideURL is the web page about the command line.
+const guideURL = "https://pulseczar.com/cli"
+
 // Env is everything the commands take from the outside, so tests can supply it.
 type Env struct {
 	Stdout, Stderr io.Writer
 	Getenv         func(string) string
 	ConfigPath     string
-	// IsTerminal is true when stdout is a terminal; it picks the table over the compact form.
+	// IsTerminal is true when stdout is a terminal; it picks the styled screen over the compact form.
 	IsTerminal bool
-	HTTP       *http.Client
-	Sleep      func(time.Duration)
-	Hostname   string
+	// StderrIsTerminal is true when stderr is a terminal; it picks the styled error over the plain one.
+	StderrIsTerminal bool
+	HTTP             *http.Client
+	Sleep            func(time.Duration)
+	// Now is the clock for relative times; its zone is the zone times are shown in.
+	Now      func() time.Time
+	Hostname string
+	// Version is the build's version, set when the program is linked.
+	Version string
 }
 
 type app struct {
@@ -57,30 +66,56 @@ func Run(args []string, env Env) int {
 func (a *app) newRoot() *cobra.Command {
 	root := &cobra.Command{
 		Use:   "pulseczar",
-		Short: "Watch and manage your PulseCzar monitors from the terminal",
-		Long: `Watch and manage your PulseCzar monitors from the terminal.
+		Short: "Check and manage your PulseCzar monitors from the terminal",
+		Long: `Check and manage your PulseCzar monitors from the terminal.
 
-Sign in once with "pulseczar auth login". Output is a table on a terminal, the
-compact form when piped, and the API body unchanged with --json.
+Sign in once with "pulseczar auth login". Output is styled on a terminal, the
+compact form when piped, and the API body unchanged with --json. Set NO_COLOR to
+turn colors off.
 
 Environment:
   PULSECZAR_TOKEN  use this token instead of the saved sign-in
   PULSECZAR_URL    use another PulseCzar server (default ` + config.DefaultURL + `)
 
 Exit codes: 0 ok, 1 error, 2 usage, 4 not signed in or not allowed.`,
+		Version:       a.env.Version,
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
+	root.SetVersionTemplate("pulseczar {{.Version}}\n")
+	root.SetUsageTemplate(root.UsageTemplate() + "\nGuide: " + guideURL + "\n")
 	root.CompletionOptions.DisableDefaultCmd = true
 	root.PersistentFlags().BoolVar(&a.asJSON, "json", false, "print the API body unchanged")
 
-	root.AddCommand(a.newAuthCommand(), a.newStatusCommand(), a.newMonitorsCommand(), a.newIncidentsCommand())
+	a.addGroupedCommands(root)
 
 	return root
 }
 
-// print writes a result in the form the caller asked for.
-func (a *app) print(view render.View, raw []byte) {
+// addGroupedCommands lists the commands in groups in the help.
+func (a *app) addGroupedCommands(root *cobra.Command) {
+	groups := []struct {
+		id, title string
+		command   *cobra.Command
+	}{
+		{"start", "Start", a.newStatusCommand()},
+		{"monitors", "Monitors", a.newMonitorsCommand()},
+		{"incidents", "Incidents", a.newIncidentsCommand()},
+		{"account", "Account", a.newAuthCommand()},
+	}
+
+	for _, group := range groups {
+		root.AddGroup(&cobra.Group{ID: group.id, Title: group.title})
+		group.command.GroupID = group.id
+		root.AddCommand(group.command)
+	}
+
+	root.SetHelpCommandGroupID("start")
+}
+
+// print writes a result in the form the caller asked for: the API body with --json,
+// the styled screen on a terminal, and the compact form otherwise.
+func (a *app) print(raw []byte, compact render.View, screen func(terminal) string) {
 	switch {
 	case a.asJSON:
 		a.env.Stdout.Write(raw)
@@ -88,10 +123,21 @@ func (a *app) print(view render.View, raw []byte) {
 			io.WriteString(a.env.Stdout, "\n")
 		}
 	case a.env.IsTerminal:
-		view.Table(a.env.Stdout)
+		io.WriteString(a.env.Stdout, screen(a.stdoutTerminal()))
 	default:
-		view.Compact(a.env.Stdout)
+		compact.Compact(a.env.Stdout)
 	}
+}
+
+func (a *app) stdoutTerminal() terminal {
+	return terminal{style: a.styleFor(a.env.IsTerminal), now: a.env.Now()}
+}
+
+// styleFor paints only on a terminal, and never when the person set NO_COLOR or TERM=dumb.
+func (a *app) styleFor(isTerminal bool) render.Style {
+	colorAllowed := a.env.Getenv("NO_COLOR") == "" && a.env.Getenv("TERM") != "dumb"
+
+	return render.NewStyle(isTerminal && colorAllowed)
 }
 
 // settings is the server and token a command uses, with where the token came from.

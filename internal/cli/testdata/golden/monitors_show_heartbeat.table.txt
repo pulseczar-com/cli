@@ -1,13 +1,8 @@
-id               M5N7P9Q1R3S5
-name             Nightly backup
-type             heartbeat
-status           up
-uptime_24h       -
-url              -
-every            1d
-snoozed          no
-last_checked_at  2026-11-01T09:59:30Z
-incidents_total  0
-ping_url         https://pulseczar.com/ping/abc123
-grace            1h
-last_heard_at    2026-11-01T03:00:04Z
+● Nightly backup  Up
+  Heartbeat · every 1d · grace 1h
+
+  Uptime 24h  -
+  Last heard  6 hours ago
+  Incidents   0 in total
+
+  On the web: https://czar.test/monitors/M5N7P9Q1R3S5

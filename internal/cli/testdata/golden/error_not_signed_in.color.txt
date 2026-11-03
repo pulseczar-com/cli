@@ -1,0 +1,2 @@
+<ESC>[31m✗<ESC>[0m not signed in
+  run `pulseczar auth login`, or set PULSECZAR_TOKEN

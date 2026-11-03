@@ -1,0 +1,2 @@
+✗ cannot reach 127.0.0.1
+  check your connection, or the address in PULSECZAR_URL

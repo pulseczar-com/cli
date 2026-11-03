@@ -1,6 +1,1 @@
-status  1 monitor down
-up      1
-down    1
-stale   1
-paused  1
-total   4
+● 1 monitor down     1 up · 1 down · 1 stale · 1 paused · 4 total

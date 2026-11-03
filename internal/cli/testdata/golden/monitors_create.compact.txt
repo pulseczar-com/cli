@@ -1,7 +1,7 @@
 id: N8P1Q3R5S7T9
 name: example.com
 type: http
-status: up
+status: new
 uptime_24h: -
 url: https://example.com
 every: 5m

@@ -113,11 +113,17 @@ type result struct {
 	configPath     string
 }
 
-// options change one run. Zero values mean: signed in by PULSECZAR_TOKEN, piped output.
+// testNow is the clock of every run. It matches the "at" time in the fixtures.
+var testNow = time.Date(2026, 11, 1, 10, 0, 0, 0, time.UTC)
+
+// options change one run. Zero values mean: signed in by PULSECZAR_TOKEN, piped
+// output, no color.
 type options struct {
-	terminal bool
-	noToken  bool
-	env      map[string]string
+	terminal       bool
+	stderrTerminal bool
+	color          bool
+	noToken        bool
+	env            map[string]string
 }
 
 func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
@@ -130,19 +136,25 @@ func runCLI(t *testing.T, czar *fakeCzar, opts options, args ...string) result {
 	if !opts.noToken {
 		env[envToken] = testToken
 	}
+	if !opts.color {
+		env["NO_COLOR"] = "1"
+	}
 	for key, value := range opts.env {
 		env[key] = value
 	}
 
 	run.code = Run(args, Env{
-		Stdout:     &out,
-		Stderr:     &errOut,
-		Getenv:     func(key string) string { return env[key] },
-		ConfigPath: run.configPath,
-		IsTerminal: opts.terminal,
-		HTTP:       czar.server.Client(),
-		Sleep:      func(d time.Duration) { run.sleeps = append(run.sleeps, d) },
-		Hostname:   "ada-laptop",
+		Stdout:           &out,
+		Stderr:           &errOut,
+		Getenv:           func(key string) string { return env[key] },
+		ConfigPath:       run.configPath,
+		IsTerminal:       opts.terminal,
+		StderrIsTerminal: opts.stderrTerminal,
+		HTTP:             czar.server.Client(),
+		Sleep:            func(d time.Duration) { run.sleeps = append(run.sleeps, d) },
+		Now:              func() time.Time { return testNow },
+		Hostname:         "ada-laptop",
+		Version:          "1.2.3",
 	})
 	run.stdout, run.stderr = withStableURL(czar, out.String()), withStableURL(czar, errOut.String())
 

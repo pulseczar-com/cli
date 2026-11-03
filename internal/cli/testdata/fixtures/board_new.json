@@ -1,0 +1,64 @@
+{
+  "at": "2026-11-01T10:00:00Z",
+  "summary": {
+    "class": "bad",
+    "text": "1 monitor down"
+  },
+  "stale_at": null,
+  "counts": {
+    "up": 1,
+    "down": 0,
+    "stale": 0,
+    "paused": 0,
+    "new": 1,
+    "total": 2
+  },
+  "monitors": [
+    {
+      "public_id": "7K3M9XQ2T4VB",
+      "name": "Marketing site",
+      "type": "http",
+      "url": "https://example.com",
+      "status": "up",
+      "stale_at": null,
+      "word": "UP",
+      "tone": "",
+      "is_new": false,
+      "is_muted": false,
+      "is_paused": false,
+      "muted_until": null,
+      "mute_mode": null,
+      "last_evaluated_at": "2026-11-01T09:59:30Z",
+      "last_checked_at": "2026-11-01T09:59:30Z",
+      "uptime_24h": 99.98,
+      "schedule": "every 5m",
+      "foot_left": "",
+      "foot_right": "",
+      "foot_right_label": "",
+      "bars": []
+    },
+    {
+      "public_id": "N8P1Q3R5S7T9",
+      "name": "example.com",
+      "type": "http",
+      "url": "https://example.com",
+      "status": "up",
+      "stale_at": null,
+      "word": "NEW",
+      "tone": "",
+      "is_new": true,
+      "is_muted": false,
+      "is_paused": false,
+      "muted_until": null,
+      "mute_mode": null,
+      "last_evaluated_at": "2026-11-01T09:59:30Z",
+      "last_checked_at": null,
+      "uptime_24h": null,
+      "schedule": "every 5m",
+      "foot_left": "",
+      "foot_right": "",
+      "foot_right_label": "",
+      "bars": []
+    }
+  ]
+}

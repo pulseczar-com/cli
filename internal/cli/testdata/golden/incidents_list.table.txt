@@ -1,5 +1,5 @@
-ID            MONITOR ID    MONITOR        STATUS    STARTED AT            DURATION
-4T9WQ8ZN2HJ5  B2C4D6F8G1H3  Checkout, API  DOWN      2026-11-01T09:12:00Z  48m
-6R8T0V2X4Z6B  B2C4D6F8G1H3  Checkout, API  RESOLVED  2026-10-30T22:00:00Z  7m
+   MONITOR        STATUS    STARTED         DURATION  ID
+ ● Checkout, API  Down      48 minutes ago  48m       4T9WQ8ZN2HJ5
+ ● Checkout, API  Resolved  1 day ago       7m        6R8T0V2X4Z6B
 
-next_cursor  eyJpZCI6NDJ9
+  Next page cursor  eyJpZCI6NDJ9

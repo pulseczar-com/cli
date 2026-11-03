@@ -43,7 +43,7 @@ func statusView(status api.Status) render.View {
 func monitorListView(monitors []api.MonitorSummary) render.View {
 	rows := make([][]string, len(monitors))
 	for i, monitor := range monitors {
-		rows[i] = []string{monitor.ID, monitor.Name, monitor.Status, uptimeText(monitor.Uptime24)}
+		rows[i] = []string{monitor.ID, monitor.Name, statusKey(monitor.Word), uptimeText(monitor.Uptime24)}
 	}
 
 	return render.View{
@@ -57,7 +57,7 @@ func monitorView(monitor api.MonitorDetail) render.View {
 		{Key: "id", Value: monitor.ID},
 		{Key: "name", Value: monitor.Name},
 		{Key: "type", Value: monitor.Type},
-		{Key: "status", Value: monitor.Status},
+		{Key: "status", Value: statusKey(monitor.Word)},
 		{Key: "uptime_24h", Value: uptimeText(monitor.Uptime24)},
 		{Key: "url", Value: textOrDash(monitor.URL)},
 		{Key: "every", Value: formatSeconds(monitor.IntervalSeconds)},

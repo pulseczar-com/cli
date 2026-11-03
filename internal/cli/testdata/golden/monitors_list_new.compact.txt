@@ -1,0 +1,4 @@
+count: 2
+monitors[2]{id,name,status,uptime_24h}:
+  7K3M9XQ2T4VB,Marketing site,up,99.98%
+  N8P1Q3R5S7T9,example.com,new,-

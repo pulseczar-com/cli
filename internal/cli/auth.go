@@ -7,6 +7,7 @@ import (
 
 	"github.com/pulseczar-com/cli/internal/api"
 	"github.com/pulseczar-com/cli/internal/config"
+	"github.com/pulseczar-com/cli/internal/render"
 	"github.com/spf13/cobra"
 )
 
@@ -99,7 +100,9 @@ func (a *app) runLogin(cmd *cobra.Command, _ []string) error {
 		return fail(err)
 	}
 
-	a.print(meView(me, found.URL, "config file"), raw)
+	a.print(raw, meView(me, found.URL, "config file"), func(t terminal) string {
+		return t.meScreen(me, found.URL, "config file")
+	})
 
 	return nil
 }
@@ -167,7 +170,9 @@ func (a *app) runAuthStatus(cmd *cobra.Command, _ []string) error {
 		return fail(err)
 	}
 
-	a.print(meView(me, found.URL, found.TokenSource), raw)
+	a.print(raw, meView(me, found.URL, found.TokenSource), func(t terminal) string {
+		return t.meScreen(me, found.URL, found.TokenSource)
+	})
 
 	return nil
 }
@@ -205,7 +210,11 @@ func (a *app) runLogout(cmd *cobra.Command, _ []string) error {
 		return failure
 	}
 
-	fmt.Fprintln(a.env.Stdout, "Logged out.")
+	message := "Logged out."
+	if a.env.IsTerminal {
+		message = a.stdoutTerminal().style.Paint(render.Green, render.MarkDone) + " " + message
+	}
+	fmt.Fprintln(a.env.Stdout, message)
 
 	return nil
 }

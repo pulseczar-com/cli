@@ -54,7 +54,7 @@ A length is a number with s, m, h or d: 90s, 5m, 2h, 1d.`,
 				return fail(err)
 			}
 
-			a.print(monitorView(monitor), raw)
+			a.print(raw, monitorView(monitor), func(t terminal) string { return t.createdScreen(monitor) })
 
 			return nil
 		},
@@ -176,7 +176,7 @@ func (a *app) newMonitorIDCommand(use, short, example string, write monitorCall)
 		Use:     use,
 		Short:   short,
 		Example: example,
-		Args:    cobra.ExactArgs(1),
+		Args:    exactlyOneID("a monitor id", "pulseczar monitors list"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := a.signedInClient()
 			if err != nil {
@@ -188,7 +188,7 @@ func (a *app) newMonitorIDCommand(use, short, example string, write monitorCall)
 				return fail(err)
 			}
 
-			a.print(monitorView(monitor), raw)
+			a.print(raw, monitorView(monitor), func(t terminal) string { return t.monitorScreen(monitor, client.BaseURL) })
 
 			return nil
 		},
@@ -208,7 +208,7 @@ func (a *app) newMonitorsSnoozeCommand() *cobra.Command {
   forever   snooze until you run "monitors unsnooze"`,
 		Example: `  pulseczar monitors snooze 7K3M9XQ2T4VB --for 1h
   pulseczar monitors snooze 7K3M9XQ2T4VB --for next`,
-		Args: cobra.ExactArgs(1),
+		Args: exactlyOneID("a monitor id", "pulseczar monitors list"),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			mode, ok := snoozeModes[length]
 			if !ok {
@@ -225,7 +225,7 @@ func (a *app) newMonitorsSnoozeCommand() *cobra.Command {
 				return fail(err)
 			}
 
-			a.print(monitorView(monitor), raw)
+			a.print(raw, monitorView(monitor), func(t terminal) string { return t.monitorScreen(monitor, client.BaseURL) })
 
 			return nil
 		},

@@ -42,6 +42,7 @@ type MonitorSummary struct {
 	Type     string   `json:"type"`
 	URL      *string  `json:"url"`
 	Status   string   `json:"status"`
+	Word     string   `json:"word"`
 	Uptime24 *float64 `json:"uptime_24h"`
 }
 

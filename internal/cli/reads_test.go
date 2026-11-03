@@ -60,7 +60,7 @@ func TestMonitorsListRejectsAnUnknownStatus(t *testing.T) {
 
 	run := runCLI(t, czar, options{}, "monitors", "list", "--status", "sleepy")
 
-	assertUsageError(t, run, `--status must be one of up, down, stale, paused; got "sleepy"`)
+	assertUsageError(t, run, `--status must be one of up, down, stale, paused, new; got "sleepy"`)
 	if len(czar.requests) != 0 {
 		t.Errorf("a usage error must not call the server")
 	}

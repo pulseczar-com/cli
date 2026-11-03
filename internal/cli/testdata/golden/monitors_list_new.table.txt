@@ -1,0 +1,3 @@
+   NAME            STATUS  UPTIME 24H  ID
+ ● Marketing site  Up      99.98%      7K3M9XQ2T4VB
+ ◌ example.com     New     -           N8P1Q3R5S7T9

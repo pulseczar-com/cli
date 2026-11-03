@@ -45,7 +45,7 @@ A token expires after 90 days without use.
 | Command | What it does |
 | --- | --- |
 | `status` | Whether your monitors are up, with the counts. |
-| `monitors list [--status down\|stale\|paused]` | List your monitors. |
+| `monitors list [--status up\|down\|stale\|paused\|new]` | List your monitors. |
 | `monitors show <id>` | One monitor, with its recent incidents. |
 | `incidents list [--open] [--since 24h] [--monitor <id>]` | Incidents, newest first, 25 to a page (`--cursor` for the next page). |
 | `incidents show <id>` | One incident and the locations that saw it. |
@@ -59,7 +59,7 @@ Writes need a **Read and write** sign-in. `pulseczar <command> --help` shows fla
 
 ## Output
 
-- On a terminal: an aligned table.
+- On a terminal: colored status dots, human labels and relative times ("2 minutes ago"). Colors use the 16 standard colors and stop when `NO_COLOR` is set or `TERM=dumb`.
 - Piped: the compact form, for scripts and agents.
 
   ```
@@ -71,7 +71,9 @@ Writes need a **Read and write** sign-in. `pulseczar <command> --help` shows fla
 
 - `--json`: the API body, unchanged.
 
-Errors go to stderr as `error:` and `code:` lines. Exit codes: 0 ok, 1 error, 2 usage, 4 not signed in or not allowed.
+The status is the word the web shows: Up, Down, Stale, Paused or New. A monitor with no result yet is New, never Up.
+
+Errors go to stderr as `error:` and `code:` lines. On a terminal they show as a red `✗` line and a hint instead. `pulseczar --version` prints the build version. Exit codes: 0 ok, 1 error, 2 usage, 4 not signed in or not allowed.
 
 ## Develop
 

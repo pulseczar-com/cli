@@ -1,0 +1,4 @@
+✓ Created Nightly backup (Heartbeat, every 1d, grace 1h)
+
+  Ping this address at the end of each run:
+  curl -fsS https://pulseczar.com/ping/abc123

@@ -1,17 +1,15 @@
-id             4T9WQ8ZN2HJ5
-monitor_id     B2C4D6F8G1H3
-monitor        Checkout, API
-status         DOWN
-started_at     2026-11-01T09:12:00Z
-failing_since  2026-11-01T09:10:00Z
-ended_at       -
-duration       48m
-scope          2 of 3 locations failing:
-quorum         2 of 4
+● Checkout, API  Down
+  Incident 4T9WQ8ZN2HJ5
 
-locations
-LOCATION   STATE
-Frankfurt  failing
-Virginia   failing
-Singapore  up
-Sydney     silent
+  Started        48 minutes ago
+  Failing since  50 minutes ago
+  Ended          -
+  Duration       48m
+  Scope          2 of 3 locations failing
+  Quorum         2 of 4
+
+  Locations
+  Frankfurt  failing
+  Virginia   failing
+  Singapore  up
+  Sydney     silent

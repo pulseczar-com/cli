@@ -1,0 +1,5 @@
+   <ESC>[90mNAME<ESC>[0m            <ESC>[90mSTATUS<ESC>[0m  <ESC>[90mUPTIME 24H<ESC>[0m  <ESC>[90mID<ESC>[0m
+ <ESC>[32m●<ESC>[0m Marketing site  <ESC>[32mUp<ESC>[0m      99.98%      <ESC>[90m7K3M9XQ2T4VB<ESC>[0m
+ <ESC>[31m●<ESC>[0m Checkout, API   <ESC>[31mDown<ESC>[0m    87.5%       <ESC>[90mB2C4D6F8G1H3<ESC>[0m
+ <ESC>[33m●<ESC>[0m Nightly backup  <ESC>[33mStale<ESC>[0m   -           <ESC>[90mM5N7P9Q1R3S5<ESC>[0m
+ <ESC>[90m○<ESC>[0m Old blog        <ESC>[90mPaused<ESC>[0m  100%        <ESC>[90mT2V4W6X8Y0Z1<ESC>[0m

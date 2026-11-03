@@ -1,12 +1,11 @@
-// Package render turns a command's result into the two human forms: an aligned
-// table for a terminal, and the compact axi form for a pipe.
+// Package render writes the compact axi form for a pipe, and holds the color and
+// column helpers the terminal screens use.
 package render
 
 import (
 	"fmt"
 	"io"
 	"strings"
-	"text/tabwriter"
 )
 
 // Field is one `key: value` line.
@@ -22,39 +21,13 @@ type List struct {
 	Rows    [][]string
 }
 
-// View is a command's result. A detail has fields and may have lists. A top-level
-// list has exactly one list and sets ShowCount, so the compact form leads with
-// `count: N`; its fields, such as a paging cursor, follow the list.
+// View is a command's result in the compact form. A detail has fields and may have
+// lists. A top-level list has exactly one list and sets ShowCount, so the compact
+// form leads with `count: N`; its fields, such as a paging cursor, follow the list.
 type View struct {
 	Fields    []Field
 	Lists     []List
 	ShowCount bool
-}
-
-// Table writes the view for a person at a terminal.
-func (v View) Table(w io.Writer) {
-	if !v.ShowCount {
-		writeFieldsAligned(w, v.Fields)
-	}
-
-	for _, list := range v.Lists {
-		if len(list.Rows) == 0 {
-			if v.ShowCount {
-				fmt.Fprintf(w, "No %s.\n", list.Name)
-			}
-			continue
-		}
-
-		if !v.ShowCount {
-			fmt.Fprintf(w, "\n%s\n", list.Name)
-		}
-		writeTable(w, list)
-	}
-
-	if v.ShowCount && len(v.Fields) > 0 {
-		fmt.Fprintln(w)
-		writeFieldsAligned(w, v.Fields)
-	}
 }
 
 // Compact writes the view in the axi form: plain `key: value` lines, and each list
@@ -84,33 +57,6 @@ func writeFieldsCompact(w io.Writer, fields []Field) {
 	for _, field := range fields {
 		fmt.Fprintf(w, "%s: %s\n", field.Key, quote(field.Value))
 	}
-}
-
-func writeFieldsAligned(w io.Writer, fields []Field) {
-	width := 0
-	for _, field := range fields {
-		width = max(width, len(field.Key))
-	}
-
-	for _, field := range fields {
-		fmt.Fprintf(w, "%-*s  %s\n", width, field.Key, field.Value)
-	}
-}
-
-func writeTable(w io.Writer, list List) {
-	tab := tabwriter.NewWriter(w, 0, 0, 2, ' ', 0)
-
-	headers := make([]string, len(list.Columns))
-	for i, column := range list.Columns {
-		headers[i] = strings.ToUpper(strings.ReplaceAll(column, "_", " "))
-	}
-	fmt.Fprintln(tab, strings.Join(headers, "\t"))
-
-	for _, row := range list.Rows {
-		fmt.Fprintln(tab, strings.Join(row, "\t"))
-	}
-
-	tab.Flush()
 }
 
 func joinQuoted(row []string) string {
