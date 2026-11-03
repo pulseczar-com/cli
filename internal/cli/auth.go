@@ -49,11 +49,12 @@ A token set in PULSECZAR_TOKEN is not touched.`,
 		},
 		&cobra.Command{
 			Use:   "token",
-			Short: "Print the saved token, for CI",
-			Long: `Print the saved token and nothing else, so a script can capture it.
+			Short: "Print the token in use, for CI",
+			Long: `Print the token in use and nothing else, so a script can capture it. The token
+is PULSECZAR_TOKEN when set, else the saved token.
 
-Store the output as the CI secret PULSECZAR_TOKEN. The command exits 4 when no
-token is saved.`,
+Store the output as the CI secret PULSECZAR_TOKEN. The command exits 4 when there
+is no token.`,
 			Example: `  PULSECZAR_TOKEN=$(pulseczar auth token)`,
 			Args:    cobra.NoArgs,
 			RunE:    a.runAuthToken,
@@ -131,16 +132,16 @@ func (a *app) runLogout(cmd *cobra.Command, _ []string) error {
 }
 
 func (a *app) runAuthToken(cmd *cobra.Command, _ []string) error {
-	file, err := config.Load(a.env.ConfigPath)
+	found, err := a.loadSettings()
 	if err != nil {
 		return fail(err)
 	}
 
-	if file.Token == "" {
+	if found.Token == "" {
 		return notSignedIn()
 	}
 
-	fmt.Fprintln(a.env.Stdout, file.Token)
+	fmt.Fprintln(a.env.Stdout, found.Token)
 
 	return nil
 }

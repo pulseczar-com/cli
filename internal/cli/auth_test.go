@@ -289,3 +289,13 @@ func TestTokenWithNothingSavedIsNotSignedIn(t *testing.T) {
 	}
 	assertErrorLines(t, run.stderr, "not_signed_in")
 }
+
+func TestTokenPrintsTheEnvironmentTokenInPlaceOfTheSavedOne(t *testing.T) {
+	czar := newFakeCzar(t, nil)
+
+	run := runCLI(t, czar, options{savedToken: "1|saved", env: map[string]string{envToken: "1|from-env"}}, "auth", "token")
+
+	if run.code != 0 || run.stdout != "1|from-env\n" || run.stderr != "" {
+		t.Errorf("exit %d, stdout %q, stderr %q", run.code, run.stdout, run.stderr)
+	}
+}

@@ -52,7 +52,7 @@ Open the address, sign in to PulseCzar if asked, type the code, choose **Read on
 | | |
 | --- | --- |
 | `pulseczar auth status` | Show the account you are signed in to. |
-| `pulseczar auth token` | Print the saved token and nothing else. |
+| `pulseczar auth token` | Print the token in use (`PULSECZAR_TOKEN`, else the saved token) and nothing else. |
 | `pulseczar auth logout` | Revoke the token on the server and delete it from this computer. |
 | `PULSECZAR_TOKEN` | Use this token instead of the saved one (for CI and scripts). |
 | `PULSECZAR_URL` | Use another PulseCzar server, such as a local one. |
