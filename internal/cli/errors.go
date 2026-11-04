@@ -81,6 +81,12 @@ var envTokenRejectedText = &terminalText{
 	hint:    "Unset it or replace it.",
 }
 
+// envTokenReadOnlyText is what a person sees when the token in PULSECZAR_TOKEN cannot write.
+var envTokenReadOnlyText = &terminalText{
+	message: envToken + " is read only.",
+	hint:    "Replace it with a Read and write token.",
+}
+
 // fail turns any error a command met into a commandError.
 func fail(err error) *commandError {
 	var already *commandError
@@ -190,9 +196,19 @@ func parserError(err error) *commandError {
 // printPlainError keeps the `error:` and `code:` lines that scripts read.
 func (a *app) printPlainError(failure *commandError) {
 	fmt.Fprintf(a.env.Stderr, "error: %s\ncode: %s\n", failure.message, failure.code)
-	for _, line := range failure.details {
+	for _, line := range a.plainDetails(failure) {
 		fmt.Fprintln(a.env.Stderr, line)
 	}
+}
+
+// plainDetails drops the `auth login` advice from a read only failure when PULSECZAR_TOKEN is set,
+// because the variable wins over the saved token.
+func (a *app) plainDetails(failure *commandError) []string {
+	if failure.code == api.CodeForbidden && a.env.Getenv(envToken) != "" {
+		return []string{"hint: " + envToken + " is read only; replace it with a Read and write token"}
+	}
+
+	return failure.details
 }
 
 // terminalWording is the message and details a person sees for a failure.
@@ -200,6 +216,9 @@ func (a *app) terminalWording(failure *commandError) (string, []string) {
 	text := failure.onTerminal
 	if failure.code == api.CodeUnauthenticated && a.env.Getenv(envToken) != "" {
 		text = envTokenRejectedText
+	}
+	if failure.code == api.CodeForbidden && a.env.Getenv(envToken) != "" {
+		text = envTokenReadOnlyText
 	}
 	if text == nil {
 		return failure.message, failure.details

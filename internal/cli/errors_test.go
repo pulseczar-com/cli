@@ -68,3 +68,22 @@ func TestAnUnreachableServerIsANetworkError(t *testing.T) {
 	}
 	assertErrorLines(t, run.stderr, "network_error")
 }
+
+func TestAReadOnlyEnvTokenIsToldToReplaceTheToken(t *testing.T) {
+	routes := map[string][]reply{"POST /api/v1/monitors/7K3M9XQ2T4VB/pause": {{http.StatusForbidden, "forbidden"}}}
+	args := []string{"monitors", "pause", "7K3M9XQ2T4VB"}
+
+	terminal := runCLI(t, newFakeCzar(t, routes), options{stderrTerminal: true}, args...)
+	piped := runCLI(t, newFakeCzar(t, routes), options{}, args...)
+
+	if want := "✗ PULSECZAR_TOKEN is read only.\n  Replace it with a Read and write token.\n"; terminal.stderr != want {
+		t.Errorf("terminal stderr %q, want %q", terminal.stderr, want)
+	}
+	assertErrorLines(t, piped.stderr, "forbidden")
+	if want := "hint: PULSECZAR_TOKEN is read only; replace it with a Read and write token\n"; !strings.Contains(piped.stderr, want) {
+		t.Errorf("piped stderr %q, want it to contain %q", piped.stderr, want)
+	}
+	if strings.Contains(piped.stderr, "auth login") {
+		t.Errorf("piped stderr %q advises `auth login`, which cannot replace PULSECZAR_TOKEN", piped.stderr)
+	}
+}
