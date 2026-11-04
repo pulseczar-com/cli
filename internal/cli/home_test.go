@@ -39,6 +39,23 @@ func TestHomeScreenWithNoMonitors(t *testing.T) {
 	assertGolden(t, "home.no_monitors", run.stdout)
 }
 
+func TestHomeScreenAndMonitorListSayNoMonitorsOnceInTheSameWords(t *testing.T) {
+	czar := newFakeCzar(t, map[string][]reply{
+		"GET /api/v1/me":    ok("me"),
+		"GET /api/v1/board": ok("board_empty"),
+	})
+
+	home := runCLI(t, czar, options{terminal: true, width: 80})
+	list := runCLI(t, czar, options{terminal: true, width: 80}, "monitors", "list")
+
+	if list.stdout != "No monitors.\n" {
+		t.Errorf("monitors list = %q", list.stdout)
+	}
+	if strings.Count(home.stdout, "No monitors") != 1 || strings.Contains(home.stdout, "yet") {
+		t.Errorf("home screen should say %q once:\n%s", "No monitors", home.stdout)
+	}
+}
+
 func TestHomeScreenListsTenMonitorsAndCountsTheRest(t *testing.T) {
 	czar := newFakeCzar(t, map[string][]reply{
 		"GET /api/v1/me":    ok("me"),

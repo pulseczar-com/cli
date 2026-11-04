@@ -68,6 +68,12 @@ func notSignedIn() error {
 	}
 }
 
+// readOnlyText is what a person sees on a terminal when a read only sign-in tries to write.
+var readOnlyText = &terminalText{
+	message: "This sign-in is read only.",
+	hint:    "Run `pulseczar auth login` and choose Read and write.",
+}
+
 // envTokenRejectedText is what a person sees when the server rejects the token in PULSECZAR_TOKEN.
 // A new `auth login` cannot help, because the variable wins over the saved token.
 var envTokenRejectedText = &terminalText{
@@ -128,6 +134,7 @@ func fromAPI(err *api.Error) *commandError {
 	case api.CodeForbidden:
 		failure.exit = exitAuth
 		failure.details = []string{"hint: this sign-in is read only; run `pulseczar auth login` and choose Read and write"}
+		failure.onTerminal = readOnlyText
 	case api.CodeInvalid:
 		failure.details = invalidDetails(err)
 	}

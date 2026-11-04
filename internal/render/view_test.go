@@ -78,7 +78,12 @@ func TestPaintUsesTheBrandColorsOnATerminalThatShowsThem(t *testing.T) {
 		{Ansi256, Green, "\x1b[38;5;78mup\x1b[0m"},
 		{Ansi256, Red, "\x1b[38;5;167mup\x1b[0m"},
 		{Basic, Green, "\x1b[32mup\x1b[0m"},
-		{TrueColor, Gray, "\x1b[90mup\x1b[0m"},
+		{TrueColor, Yellow, "\x1b[38;2;240;166;60mup\x1b[0m"},
+		{TrueColor, Gray, "\x1b[38;2;111;128;120mup\x1b[0m"},
+		{Ansi256, Yellow, "\x1b[38;5;215mup\x1b[0m"},
+		{Ansi256, Gray, "\x1b[38;5;243mup\x1b[0m"},
+		{Basic, Yellow, "\x1b[33mup\x1b[0m"},
+		{Basic, Gray, "\x1b[90mup\x1b[0m"},
 	}
 
 	for _, tc := range cases {
