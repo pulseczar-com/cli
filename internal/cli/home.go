@@ -147,10 +147,9 @@ func (t terminal) homeScreen(logo string, me api.Me, board api.Board) string {
 	account := fmt.Sprintf("%s · %s · %d of %d", me.Email, me.PlanWord, me.MonitorCount, me.MonitorLimit)
 	fmt.Fprintf(&out, " %s %s     %s\n\n", t.style.Paint(statusColor(board.Counts), "●"), board.Summary.Text, t.gray(account))
 
+	// With no monitors, the summary line already says so.
 	monitors := problemsFirst(board.Monitors)
-	if len(monitors) == 0 {
-		out.WriteString("   No monitors yet.\n\n")
-	} else {
+	if len(monitors) > 0 {
 		out.WriteString(t.homeMonitors(monitors))
 		out.WriteString("\n")
 	}

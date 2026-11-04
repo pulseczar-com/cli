@@ -1,0 +1,2 @@
+✗ This sign-in is read only.
+  Run `pulseczar auth login` and choose Read and write.

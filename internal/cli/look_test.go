@@ -124,6 +124,17 @@ func TestAnErrorOnAStderrTerminalIsStyledAndDropsTheCodeLine(t *testing.T) {
 	}
 }
 
+func TestAReadOnlySignInOnATerminalSaysHowToGetWriteAccess(t *testing.T) {
+	czar := newFakeCzar(t, map[string][]reply{"POST /api/v1/monitors/7K3M9XQ2T4VB/pause": {{http.StatusForbidden, "forbidden"}}})
+
+	run := runCLI(t, czar, options{stderrTerminal: true, noToken: true, savedToken: "1|saved"}, "monitors", "pause", "7K3M9XQ2T4VB")
+
+	assertGolden(t, "error_read_only.stderr_terminal", run.stderr)
+	if run.code != exitAuth {
+		t.Errorf("exit = %d, want %d", run.code, exitAuth)
+	}
+}
+
 func TestAnErrorColorsOnlyTheMark(t *testing.T) {
 	czar := newFakeCzar(t, nil)
 

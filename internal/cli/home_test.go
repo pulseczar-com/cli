@@ -39,6 +39,16 @@ func TestHomeScreenWithNoMonitors(t *testing.T) {
 	assertGolden(t, "home.no_monitors", run.stdout)
 }
 
+func TestMonitorListWithNoMonitorsUsesTheHomeScreenWords(t *testing.T) {
+	czar := newFakeCzar(t, map[string][]reply{"GET /api/v1/board": ok("board_empty")})
+
+	run := runCLI(t, czar, options{terminal: true, width: 80}, "monitors", "list")
+
+	if run.stdout != "No monitors.\n" {
+		t.Errorf("monitors list = %q", run.stdout)
+	}
+}
+
 func TestHomeScreenListsTenMonitorsAndCountsTheRest(t *testing.T) {
 	czar := newFakeCzar(t, map[string][]reply{
 		"GET /api/v1/me":    ok("me"),

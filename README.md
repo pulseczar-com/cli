@@ -114,7 +114,7 @@ set -g status-right '#(NO_COLOR=1 pulseczar status --line)'
 
 ## Output
 
-- On a terminal: colored status dots, human labels and relative times ("2 minutes ago"). Green and red use the PulseCzar colors when `COLORTERM` is `truecolor` or `24bit`, or `TERM` names `256color`. Other terminals get the 16 standard colors. Color stops when `NO_COLOR` is set or `TERM=dumb`.
+- On a terminal: colored status dots, human labels and relative times ("2 minutes ago"). Green, red, yellow and gray use the PulseCzar colors when `COLORTERM` is `truecolor` or `24bit`, or `TERM` names `256color`. Other terminals get the 16 standard colors. Color stops when `NO_COLOR` is set or `TERM=dumb`.
 - Piped: the compact form, for scripts and agents.
 
   ```

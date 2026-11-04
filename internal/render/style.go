@@ -5,9 +5,8 @@ import (
 	"unicode/utf8"
 )
 
-// Color is a named color. Gray and Yellow are standard terminal colors, so the
-// person's theme picks the shade. Green and Red are the brand colors, which a
-// terminal with more colors shows exactly.
+// Color is a named color. Each is the website's color, which a terminal with more
+// colors shows exactly; a basic terminal shows its own standard color.
 type Color int
 
 // The colors a screen uses.
@@ -40,13 +39,14 @@ type codes struct {
 	basic, ansi256, trueColor string
 }
 
-// The brand colors are #3DDC84 and #E5484D from the website's dark theme. Truecolor shows them exactly;
-// 256-color uses the nearest palette entries, 78 (#5fd787) and 167 (#d75f5f).
+// The colors are #3DDC84, #E5484D, #F0A63C and #6F8078 from the website's dark theme. Truecolor shows
+// them exactly; 256-color uses the nearest palette entries, 78 (#5fd787), 167 (#d75f5f), 215 (#ffaf5f)
+// and 243 (#767676).
 var colorCodes = map[Color]codes{
 	Green:  {"32", "38;5;78", "38;2;61;220;132"},
 	Red:    {"31", "38;5;167", "38;2;229;72;77"},
-	Yellow: {"33", "33", "33"},
-	Gray:   {"90", "90", "90"},
+	Yellow: {"33", "38;5;215", "38;2;240;166;60"},
+	Gray:   {"90", "38;5;243", "38;2;111;128;120"},
 }
 
 // Style paints text. A Style that is off returns the text unchanged.
