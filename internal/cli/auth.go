@@ -25,7 +25,9 @@ func (a *app) newAuthCommand() *cobra.Command {
 The command shows a code, then opens PulseCzar in your browser when you press
 Enter. Sign in if asked, type the code, choose Read only or Read and write, and
 approve. Over SSH, or when input is not a terminal, the command prints the
-address and the code and opens nothing. The command waits, then saves the token to ~/.config/pulseczar/config.json.`,
+address and the code and opens nothing. The command waits, then saves the token to ~/.config/pulseczar/config.json.
+
+The token is named after this computer. Signing in again here replaces it.`,
 			Example: `  pulseczar auth login`,
 			Args:    cobra.NoArgs,
 			RunE:    a.runLogin,
