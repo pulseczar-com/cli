@@ -47,7 +47,7 @@ Open: https://pulseczar.com/cli
 Code: BCDF-GHJK
 ```
 
-Open the address, sign in to PulseCzar if asked, type the code, choose **Read only** or **Read and write**, and approve. The command then saves a token to `~/.config/pulseczar/config.json` (mode 0600). No token is created or shown on the web.
+Open the address, sign in to PulseCzar if asked, type the code, choose **Read only** or **Read and write**, and approve. The command then saves a token to `~/.config/pulseczar/config.json` (mode 0600). No token is created or shown on the web. The token is named after this computer. Signing in again here replaces it.
 
 | | |
 | --- | --- |
@@ -81,6 +81,10 @@ A token expires after 90 days without use.
 | `open [monitor]` | Open the dashboard, or one monitor's page, in your browser. |
 
 `<monitor>` is a monitor's id, its name, or the start of its name, in any case. Two monitors that match are an error that lists both.
+
+To read the ping URL in a script, run `pulseczar monitors show <monitor> --json | jq -r .ping_url`.
+
+Heartbeat names are not unique. List first; a second create makes a second monitor.
 
 Writes need a **Read and write** sign-in. `pulseczar <command> --help` shows flags and examples.
 

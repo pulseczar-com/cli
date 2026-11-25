@@ -39,7 +39,9 @@ With an address, PulseCzar checks it from several locations every --every
 (default ` + defaultHTTPEvery + `). With --heartbeat, PulseCzar waits for your job to ping a
 secret address and raises an incident when a ping is late by more than --grace.
 
-A length is a number with s, m, h or d: 90s, 5m, 2h, 1d.`,
+A length is a number with s, m, h or d: 90s, 5m, 2h, 1d.
+
+Heartbeat names are not unique. List first; a second create makes a second monitor.`,
 		Example: `  pulseczar monitors create https://example.com
   pulseczar monitors create https://example.com --name "Marketing site" --every 1m
   pulseczar monitors create --heartbeat --name "Nightly backup" --every 1d --grace 1h`,
@@ -73,7 +75,7 @@ A length is a number with s, m, h or d: 90s, 5m, 2h, 1d.`,
 	}
 	create.Flags().StringVar(&flags.name, "name", "", "the monitor's name (default: the address's host)")
 	create.Flags().StringVar(&flags.every, "every", "", "how often to check, or how often the job pings")
-	create.Flags().StringVar(&flags.grace, "grace", "", "heartbeat only: how late a ping may be")
+	create.Flags().StringVar(&flags.grace, "grace", "", "heartbeat only: how late a ping may be. The server picks a default for the interval when you leave it out.")
 	create.Flags().BoolVar(&flags.heartbeat, "heartbeat", false, "create a heartbeat monitor instead of checking an address")
 
 	return create
