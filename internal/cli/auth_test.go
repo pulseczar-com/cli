@@ -157,7 +157,7 @@ func TestAPlainHTTPURLIsRefusedExceptForLocalhost(t *testing.T) {
 	czar := newFakeCzar(t, map[string][]reply{"GET /api/v1/status": ok("status")})
 
 	refused := runCLI(t, czar, options{env: map[string]string{envURL: "http://pulseczar.example"}}, "status")
-	if refused.code != exitError || !strings.Contains(refused.stderr, "http://pulseczar.example") {
+	if refused.code != exitError || !strings.Contains(refused.stderr, "refusing to use http://pulseczar.example over http") || !strings.Contains(refused.stderr, "allowed only for localhost") {
 		t.Errorf("exit %d: %s", refused.code, refused.stderr)
 	}
 	if len(czar.requests) != 0 {
@@ -184,7 +184,7 @@ func TestLogoutDoesNotSendTheTokenToAPlainHTTPURL(t *testing.T) {
 		Getenv: func(string) string { return "" },
 	})
 
-	if code != exitError || !strings.Contains(out.String(), "did not revoke") {
+	if code != exitError || !strings.Contains(out.String(), "did not revoke the token: refusing to use http://pulseczar.example over http") {
 		t.Errorf("exit %d: %s", code, out.String())
 	}
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
