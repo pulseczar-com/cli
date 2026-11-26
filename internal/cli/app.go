@@ -4,7 +4,9 @@ package cli
 import (
 	"bytes"
 	"io"
+	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -205,7 +207,32 @@ func (a *app) loadSettings() (settings, error) {
 		found.Token, found.TokenSource = value, envToken
 	}
 
+	if err := requireSecureURL(found.URL); err != nil {
+		return settings{}, err
+	}
+
 	return found, nil
+}
+
+// requireSecureURL refuses a plain http:// server unless it is this machine,
+// because the token would cross the network in clear text.
+func requireSecureURL(raw string) error {
+	parsed, err := url.Parse(raw)
+	if err != nil || parsed.Scheme != "http" {
+		return nil
+	}
+
+	host := strings.ToLower(parsed.Hostname())
+	if host == "localhost" || net.ParseIP(host).IsLoopback() {
+		return nil
+	}
+
+	return &commandError{
+		exit:    exitError,
+		code:    codeLocalFailure,
+		message: "refusing to use " + raw + " over http",
+		details: []string{"hint: use an https:// URL; http:// is allowed only for localhost"},
+	}
 }
 
 // signedInClient returns a client with a token, or the not-signed-in error.

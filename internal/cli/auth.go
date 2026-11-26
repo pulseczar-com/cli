@@ -106,7 +106,10 @@ func (a *app) runLogout(cmd *cobra.Command, _ []string) error {
 		url = config.DefaultURL
 	}
 
-	revokeErr := (&api.Client{BaseURL: url, Token: file.Token, HTTP: a.env.HTTP}).Logout()
+	revokeErr := requireSecureURL(url)
+	if revokeErr == nil {
+		revokeErr = (&api.Client{BaseURL: url, Token: file.Token, HTTP: a.env.HTTP}).Logout()
+	}
 
 	if err := config.Remove(a.env.ConfigPath); err != nil {
 		return fail(err)

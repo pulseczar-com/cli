@@ -153,6 +153,45 @@ func TestPulseczarURLMayEndInASlash(t *testing.T) {
 	}
 }
 
+func TestAPlainHTTPURLIsRefusedExceptForLocalhost(t *testing.T) {
+	czar := newFakeCzar(t, map[string][]reply{"GET /api/v1/status": ok("status")})
+
+	refused := runCLI(t, czar, options{env: map[string]string{envURL: "http://pulseczar.example"}}, "status")
+	if refused.code != exitError || !strings.Contains(refused.stderr, "refusing to use http://pulseczar.example over http") || !strings.Contains(refused.stderr, "allowed only for localhost") {
+		t.Errorf("exit %d: %s", refused.code, refused.stderr)
+	}
+	if len(czar.requests) != 0 {
+		t.Errorf("sent %d requests to a refused URL", len(czar.requests))
+	}
+
+	for _, local := range []string{"http://localhost:8000", "http://127.0.0.1:8000", "http://[::1]:8000", "http://LOCALHOST:8000"} {
+		if err := requireSecureURL(local); err != nil {
+			t.Errorf("%s refused: %v", local, err)
+		}
+	}
+}
+
+func TestLogoutDoesNotSendTheTokenToAPlainHTTPURL(t *testing.T) {
+	czar := newFakeCzar(t, nil)
+	path := t.TempDir() + "/config.json"
+	if err := config.Save(path, config.File{URL: "http://pulseczar.example", Token: "1|saved"}); err != nil {
+		t.Fatal(err)
+	}
+
+	var out strings.Builder
+	code := Run([]string{"auth", "logout"}, Env{
+		Stdout: &out, Stderr: &out, ConfigPath: path, HTTP: czar.server.Client(),
+		Getenv: func(string) string { return "" },
+	})
+
+	if code != exitError || !strings.Contains(out.String(), "did not revoke the token: refusing to use http://pulseczar.example over http") {
+		t.Errorf("exit %d: %s", code, out.String())
+	}
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		t.Errorf("config file still exists: %v", err)
+	}
+}
+
 func TestTheSavedTokenIsUsedAndTheEnvironmentTokenWinsOverIt(t *testing.T) {
 	czar := newFakeCzar(t, map[string][]reply{"GET /api/v1/status": ok("status")})
 	path := t.TempDir() + "/config.json"
